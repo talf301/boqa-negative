@@ -1,0 +1,4 @@
+Python implementations of Bayes Nets:
+
+Bayes Blocks:   http://research.ics.aalto.fi/bayes/software/
+BayesPy:        http://www.bayespy.org/intro.html
