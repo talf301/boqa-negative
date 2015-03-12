@@ -1,0 +1,5 @@
+-Class/interface for entire boqa net
+-Two seperate types, one for "items" (omim/diseases), one for hidden/query layer (hpo/symptoms)
+-Each hidden/query node object has a reference to the hpo term object it is representing, as well as all of its links in the net
+-Each item node should just have a reference to an omim disease object containing annotations and frequencies and whatnot
+-For setting up the states based on a list of hpo terms, need a dictionary from hpoid: query layer node objects
