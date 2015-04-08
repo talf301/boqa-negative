@@ -84,4 +84,18 @@ class QueryNode(OntologyNode):
 
 
 class HiddenNode(OntologyNode):
-    pass
+    """
+    A single hidden node in the net
+    Additional attributes:
+    corresponding query node
+    """
+
+    def __init__(self, hp):
+        """
+        Create a new hidden node from an HP object
+        :param hp:  The hpo node being represented
+        :return:
+        """
+        self.query = None
+        OntologyNode.__init__(self, hp)
+
