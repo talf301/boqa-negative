@@ -54,6 +54,9 @@ class Net:
             hid.fix_parents_children(self.hid_dict)
             quer.fix_parents_children(self.query_dict)
 
+        # Fix item-hidden connections
+        for item in self.items:
+            item.fix_diseases(self.hid_dict, hpo)
 
 if __name__ == '__main__':
     net = Net('./hp.obo', './phenotype_annotation.tab')

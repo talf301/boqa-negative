@@ -18,13 +18,13 @@ class ItemNode:
         self.disease = disease
         self.hids = {}
 
-    def fix_diseases(self, hid_dict):
+    def fix_diseases(self, hid_dict, hpo):
         """
         Update the dictionary of hidden units correctly
         """
         for hp_term, freq in self.disease.phenotype_freqs.items():
             # hp_term is a string, need to get the hp object and then hidden node
-            hid_node = hid_dict[HPO.hps[hp_term]]
+            hid_node = hid_dict[hpo[hp_term]]
             self.hids[hid_node] = freq
 
 
