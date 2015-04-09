@@ -87,11 +87,13 @@ class Net:
 
     def diagnose(self):
         """
-
+        Do the basic diagnosis, computing marginals and sorting and then returning the top 20 possibilities
         :return: a list of the top 5 diseases with probabilities
         """
         dis_scores = [(dis.disease.id
                        , dis.get_marginal_no_freq(self.hids, 0.001, 0.1)) for dis in self.items]
+        den = sum(d[1] for d in dis_scores)
+        dis_scores = [(d[0], d[1]/den) for d in dis_scores]
         dis_scores.sort(key=lambda x: x[1], reverse=True)
         return dis_scores[:20]
 
