@@ -1,6 +1,8 @@
 from omim import MIM, Disease
 from hpo import HPO, HP
 
+__author__ = 'Tal Friedman (talf301@gmail.com)'
+
 class ItemNode:
     """
     A single item node in the net

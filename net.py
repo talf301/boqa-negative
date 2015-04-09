@@ -3,6 +3,7 @@ from omim import Disease, MIM
 from nodes import HiddenNode, ItemNode, QueryNode
 import logging
 
+__author__ = 'Tal Friedman (talf301@gmail.com)'
 
 
 class Net:
