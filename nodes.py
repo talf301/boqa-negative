@@ -24,8 +24,54 @@ class ItemNode:
         """
         for hp_term, freq in self.disease.phenotype_freqs.items():
             # hp_term is a string, need to get the hp object and then hidden node
-            hid_node = hid_dict[hpo[hp_term]]
-            self.hids[hid_node] = freq
+            try:
+                hid_node = hid_dict[hpo[hp_term]]
+                self.hids[hid_node] = freq
+            except KeyError:
+                pass
+
+    def get_marginal_no_freq(self, hids, alpha, beta):
+        """
+        Compute the marginal for this disease ignoring frequency annotations
+        """
+        # hidden nodes actually annotated
+        annotated = set()
+        for hid_node in self.hids.keys():
+            annotated.add(hid_node)
+            for anc in hid_node.ancestors:
+                annotated.add(anc)
+
+        # Do actual computation
+        return self._compute_marginal(annotated, hids, alpha, beta)
+
+
+    def _compute_marginal(self, annotated, hids, alpha, beta):
+        """
+        Given an actual set of annotated hidden units (implicit and explicit), do computation
+        :param annotated: set of annotated hidden units to this item node
+        :param hids: list of all hidden units in the net
+        """
+        m001 = 0
+        m011 = 0
+        m101 = 0
+        m111 = 0
+        for hid in hids:
+            # Only interested in units where visible parents are on
+            if not hid.query.parents_on: continue
+            if hid in annotated:
+                if hid.query.state == 1:
+                    m111 += 1
+                else:
+                    m011 += 1
+            else:
+                if hid.query.state == 1:
+                    m101 += 1
+                else:
+                    m001 += 1
+
+        return pow(beta, m011) * pow(1-beta, m111) * pow(1-alpha, m001) * pow(alpha, m101)
+
+
 
 
 class OntologyNode:
@@ -36,6 +82,7 @@ class OntologyNode:
     HP object
     parents
     children
+    ancestors
     state
     """
 
@@ -48,7 +95,8 @@ class OntologyNode:
         self.hp = hp
         self.parents = set()
         self.children = set()
-        self.state = False
+        self.ancestors = set()
+        self.state = None
 
     def fix_parents_children(self, node_dict):
         """
@@ -65,6 +113,10 @@ class OntologyNode:
         for term in self.hp.children:
             self.children.add(node_dict[term])
 
+        # Ancestors
+        for term in self.hp.ancestors():
+            self.ancestors.add(node_dict[term])
+
 
 class QueryNode(OntologyNode):
     """
@@ -80,7 +132,11 @@ class QueryNode(OntologyNode):
         :param hp: The hpo node being represented
         """
         self.hidden = None
+        self.parents_on = None
         OntologyNode.__init__(self, hp)
+
+    def update_parent_status(self):
+        self.parents_on = all(s.state == 1 for s in self.parents)
 
 
 class HiddenNode(OntologyNode):
