@@ -27,6 +27,7 @@ class Net:
         self.items = []
         self.quers = []
 
+
         # Initialize hidden/query nodes
         for hp in self.hpo:
             # Create hidden/query node
@@ -52,7 +53,7 @@ class Net:
             hid = self.hid_dict[hp]
             quer = self.query_dict[hp]
             hid.query = quer
-            quer.hidden = hid
+            quer.hid = hid
             hid.fix_parents_children(self.hid_dict)
             quer.fix_parents_children(self.query_dict)
 
@@ -86,6 +87,10 @@ class Net:
         for quer in self.quers:
             quer.update_parent_status()
 
+        # Update the set of nodes we are actually interested in for computation
+        self.interest_quer = [quer for quer in self.quers if quer.parents_on]
+        self.interest_quer.sort()
+
 
     def diagnose(self):
         """
@@ -93,7 +98,7 @@ class Net:
         :return: a list of the top 5 diseases with probabilities
         """
         dis_scores = [(dis.disease.id
-                       , dis.get_marginal_no_freq(self.hids, 0.001, 0.1)) for dis in self.items]
+                       , dis.get_marginal_no_freq(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
         den = sum(d[1] for d in dis_scores)
         dis_scores = [(d[0], d[1]/den) for d in dis_scores]
         dis_scores.sort(key=lambda x: x[1], reverse=True)
@@ -107,9 +112,9 @@ if __name__ == '__main__':
     print len(net.items)
     print len(net.quers)
     net.set_query(open("./First_3450_356_hpo.txt", 'r').readline().split(','))
-    print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
+    #print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
     cProfile.run('net.diagnose()')
-    #print net.diagnose()
+    print net.diagnose()
 
 
 

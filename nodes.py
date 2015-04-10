@@ -32,34 +32,38 @@ class ItemNode:
             except KeyError:
                 pass
 
-    def get_marginal_no_freq(self, hids, alpha, beta):
+    def get_marginal_no_freq(self, hids, alpha, beta, interested_quer):
         """
         Compute the marginal for this disease ignoring frequency annotations
         """
         # hidden nodes actually annotated
-        annotated = set()
+        annot = []
         for hid_node in self.hids.keys():
-            annotated.add(hid_node)
+            annot.append(hid_node)
             for anc in hid_node.ancestors:
-                annotated.add(anc)
-
+                annot.append(anc)
+        annotated = set(annot)
+        #print len(annot) - len(annotated)
         # Do actual computation
-        return self._compute_marginal(annotated, hids, alpha, beta)
+        return self._compute_marginal(annotated, hids, alpha, beta, interested_quer)
 
 
-    def _compute_marginal(self, annotated, hids, alpha, beta):
+    def _compute_marginal(self, annotated, hids, alpha, beta, interested_quer):
         """
         Given an actual set of annotated hidden units (implicit and explicit), do computation
         :param annotated: set of annotated hidden units to this item node
         :param hids: list of all hidden units in the net
+        :param alpha: Alpha from model, false positive
+        :param beta: Beta from model, false negative
+        :param interested_quer: The terms which have all parents active in the query
         """
         m001 = 0
         m011 = 0
         m101 = 0
         m111 = 0
-        for hid in hids:
+        for quer in interested_quer:
             # Only interested in units where visible parents are on
-            if not hid.query.parents_on: continue
+            hid = quer.hid
             if annotated.__contains__(hid):
                 if hid.query.state == 1:
                     m111 += 1
@@ -133,7 +137,7 @@ class QueryNode(OntologyNode):
         Create a new query node from an HP object
         :param hp: The hpo node being represented
         """
-        self.hidden = None
+        self.hid = None
         self.parents_on = None
         OntologyNode.__init__(self, hp)
 
