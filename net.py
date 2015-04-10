@@ -1,6 +1,7 @@
 from hpo import HP, HPO
 from omim import Disease, MIM
 from nodes import HiddenNode, ItemNode, QueryNode
+import cProfile
 import logging
 
 __author__ = 'Tal Friedman (talf301@gmail.com)'
@@ -107,7 +108,8 @@ if __name__ == '__main__':
     print len(net.quers)
     net.set_query(open("./First_3450_356_hpo.txt", 'r').readline().split(','))
     print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
-    print net.diagnose()
+    cProfile.run('net.diagnose()')
+    #print net.diagnose()
 
 
 

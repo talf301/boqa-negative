@@ -60,7 +60,7 @@ class ItemNode:
         for hid in hids:
             # Only interested in units where visible parents are on
             if not hid.query.parents_on: continue
-            if hid in annotated:
+            if annotated.__contains__(hid):
                 if hid.query.state == 1:
                     m111 += 1
                 else:
