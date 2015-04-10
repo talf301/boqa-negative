@@ -27,12 +27,15 @@ class Net:
         self.items = []
         self.quers = []
 
+        # Keep track of indices
+        curr_ind = 0
 
         # Initialize hidden/query nodes
         for hp in self.hpo:
             # Create hidden/query node
-            hid = HiddenNode(hp)
-            quer = QueryNode(hp)
+            hid = HiddenNode(hp, curr_ind)
+            quer = QueryNode(hp, curr_ind)
+            curr_ind += 1
             # Add it to our {hp -> node} dicts
             self.hid_dict[hp] = hid
             self.query_dict[hp] = quer

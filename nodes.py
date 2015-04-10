@@ -1,5 +1,6 @@
 from omim import MIM, Disease
 from hpo import HPO, HP
+from bitarray import bitarray
 
 __author__ = 'Tal Friedman (talf301@gmail.com)'
 
@@ -37,21 +38,22 @@ class ItemNode:
         Compute the marginal for this disease ignoring frequency annotations
         """
         # hidden nodes actually annotated
-        annot = []
+        annot = bitarray(len(hids))
+        annot.setall(False)
+
         for hid_node in self.hids.keys():
-            annot.append(hid_node)
+            annot[hid_node.index] = True
             for anc in hid_node.ancestors:
-                annot.append(anc)
-        annotated = set(annot)
+                annot[anc.index] = True
         #print len(annot) - len(annotated)
         # Do actual computation
-        return self._compute_marginal(annotated, hids, alpha, beta, interested_quer)
+        return self._compute_marginal(annot, hids, alpha, beta, interested_quer)
 
 
     def _compute_marginal(self, annotated, hids, alpha, beta, interested_quer):
         """
         Given an actual set of annotated hidden units (implicit and explicit), do computation
-        :param annotated: set of annotated hidden units to this item node
+        :param annotated: bitarray of whether or not each unit is annotated
         :param hids: list of all hidden units in the net
         :param alpha: Alpha from model, false positive
         :param beta: Beta from model, false negative
@@ -64,7 +66,7 @@ class ItemNode:
         for quer in interested_quer:
             # Only interested in units where visible parents are on
             hid = quer.hid
-            if annotated.__contains__(hid):
+            if annotated[hid.index]:
                 if hid.query.state == 1:
                     m111 += 1
                 else:
@@ -92,17 +94,18 @@ class OntologyNode:
     state
     """
 
-    def __init__(self, hp):
+    def __init__(self, hp, index):
         """
         Create a new Query/hidden node from an HP object
         :param hp: The hpo node that this is representing
-
+        :param index: the index whih this node is given, used for "hashing" purposes
         """
         self.hp = hp
         self.parents = set()
         self.children = set()
         self.ancestors = set()
         self.state = None
+        self.index = index
 
     def fix_parents_children(self, node_dict):
         """
@@ -132,14 +135,14 @@ class QueryNode(OntologyNode):
     corresponding hidden node
     """
 
-    def __init__(self, hp):
+    def __init__(self, hp, index):
         """
         Create a new query node from an HP object
         :param hp: The hpo node being represented
         """
         self.hid = None
         self.parents_on = None
-        OntologyNode.__init__(self, hp)
+        OntologyNode.__init__(self, hp, index)
 
     def update_parent_status(self):
         self.parents_on = all(s.state == 1 for s in self.parents)
@@ -152,12 +155,12 @@ class HiddenNode(OntologyNode):
     corresponding query node
     """
 
-    def __init__(self, hp):
+    def __init__(self, hp, index):
         """
         Create a new hidden node from an HP object
         :param hp:  The hpo node being represented
         :return:
         """
         self.query = None
-        OntologyNode.__init__(self, hp)
+        OntologyNode.__init__(self, hp, index)
 
