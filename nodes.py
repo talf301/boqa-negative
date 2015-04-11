@@ -42,9 +42,7 @@ class ItemNode:
         annot.setall(False)
 
         for hid_node in self.hids.keys():
-            annot[hid_node.index] = True
-            for anc in hid_node.ancestors:
-                annot[anc.index] = True
+            annot = annot | hid_node.bitarr
         #print len(annot) - len(annotated)
         # Do actual computation
         return self._compute_marginal(annot, hids, alpha, beta, interested_quer)
@@ -125,6 +123,12 @@ class OntologyNode:
         # Ancestors
         for term in self.hp.ancestors():
             self.ancestors.add(node_dict[term])
+
+        self.bitarr = bitarray(len(node_dict))
+        self.bitarr.setall(False)
+        self.bitarr[self.index] = True
+        for term in self.ancestors:
+            self.bitarr[term.index] = True
 
 
 class QueryNode(OntologyNode):
