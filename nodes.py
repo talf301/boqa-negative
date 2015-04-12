@@ -21,6 +21,7 @@ class ItemNode:
         self.disease = disease
         self.hids = {}
 
+
     def fix_diseases(self, hid_dict, hpo):
         """
         Update the dictionary of hidden units correctly
@@ -29,9 +30,57 @@ class ItemNode:
             # hp_term is a string, need to get the hp object and then hidden node
             try:
                 hid_node = hid_dict[hpo[hp_term]]
-                self.hids[hid_node] = freq
+                if freq:
+                    self.hids[hid_node] = freq
+                else:
+                    self.hids[hid_node] = 1.0
             except KeyError:
                 pass
+
+
+    def get_marginal_k_freq(self, hids, alpha, beta, interested_quer, k=5):
+        """
+        Compute the marginal for this disease using the k lowest valued frequency annotations
+        :param hids:
+        :param alpha: Alpha from model, false positive
+        :param beta: beta from model, false negative
+        :param interested_quer: the terms which have all parents active in the query
+        """
+        freqs = self.hids.items()
+        # Get all the probability 1
+        hid_freq_1 = [x for x in freqs if x[1] == 1.0]
+
+        # Get all probability not 1 and sort
+        hid_freq_lt_1 = [x for x in freqs if x[1] < 1.0]
+        hid_freq_lt_1.sort(key=lambda x: x[1])
+
+        # Get stuff to sample, set up accumulator
+        to_sample = hid_freq_lt_1[:k]
+        marg = 0
+
+        # Add the things we aren't sampling back in to fixed stuff
+        hid_freq_1.extend(hid_freq_lt_1[k:])
+
+        # Set up base annotations, fixed stuff
+        base_annot = bitarray(len(hids))
+        base_annot.setall(False)
+        for hid_node, freq in hid_freq_1:
+            base_annot = base_annot | hid_node.bitarr
+
+
+        for i in xrange(2 ** len(to_sample)):
+            annot = base_annot.copy()
+            prob = 1
+            for j, hid_freq_pair in enumerate(to_sample):
+                # Add if it fits in, just multiply prob otherwise
+                if i % (2 ** j) == 0:
+                    annot = annot | hid_freq_pair[0].bitarr
+                    prob *= hid_freq_pair[1]
+                else:
+                    prob *= (1-hid_freq_pair[1])
+            marg += prob * self._compute_marginal(annot, alpha, beta, interested_quer)
+
+        return marg
 
     def get_marginal_no_freq(self, hids, alpha, beta, interested_quer):
         """
@@ -45,14 +94,13 @@ class ItemNode:
             annot = annot | hid_node.bitarr
         #print len(annot) - len(annotated)
         # Do actual computation
-        return self._compute_marginal(annot, hids, alpha, beta, interested_quer)
+        return self._compute_marginal(annot, alpha, beta, interested_quer)
 
 
-    def _compute_marginal(self, annotated, hids, alpha, beta, interested_quer):
+    def _compute_marginal(self, annotated, alpha, beta, interested_quer):
         """
         Given an actual set of annotated hidden units (implicit and explicit), do computation
         :param annotated: bitarray of whether or not each unit is annotated
-        :param hids: list of all hidden units in the net
         :param alpha: Alpha from model, false positive
         :param beta: Beta from model, false negative
         :param interested_quer: The terms which have all parents active in the query
