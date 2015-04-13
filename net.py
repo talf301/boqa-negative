@@ -106,6 +106,9 @@ class Net:
         elif type == 'k_freq':
             dis_scores = [(dis.disease.id,
                            dis.get_marginal_k_freq(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
+        elif type == 'sample':
+            dis_scores = [(dis.disease.id,
+                           dis.get_marginal_sampling(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
 
         den = sum(d[1] for d in dis_scores)
         dis_scores = [(d[0], d[1]/den) for d in dis_scores]
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     print len(net.quers)
     net.set_query(open("./First_3450_356_hpo.txt", 'r').readline().split(','))
     #print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
-    type = 'k_freq'
+    type = 'sample'
     cProfile.run('net.diagnose(type=type)')
     print net.diagnose(type=type)
 

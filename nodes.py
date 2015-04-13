@@ -1,6 +1,7 @@
 from omim import MIM, Disease
 from hpo import HPO, HP
 from bitarray import bitarray
+import random
 
 __author__ = 'Tal Friedman (talf301@gmail.com)'
 
@@ -37,6 +38,28 @@ class ItemNode:
             except KeyError:
                 pass
 
+
+    def get_marginal_sampling(self, hids, alpha, beta, interested_quer, samples=100):
+        freqs = self.hids.items()
+        hid_freq_1 = [x for x in freqs if x[1] == 1.0]
+        to_sample = [x for x in freqs if x[1] < 1.0]
+
+        # Set up base annotations, fixed stuff
+        base_annot = bitarray(len(hids))
+        base_annot.setall(False)
+        for hid_node, freq in hid_freq_1:
+            base_annot = base_annot | hid_node.bitarr
+
+        marg = 0
+
+        for i in xrange(samples):
+            annot = base_annot.copy()
+            for hid_node, freq in to_sample:
+                if random.uniform(0,1) < freq:
+                    annot = annot | hid_node.bitarr
+            marg += self._compute_marginal(annot, alpha, beta, interested_quer)
+
+        return marg / samples
 
     def get_marginal_k_freq(self, hids, alpha, beta, interested_quer, k=5):
         """
