@@ -23,6 +23,7 @@ class Disease:
         self.id = id
         self.name = name
         self.phenotype_freqs = phenotype_freqs
+        self.neg_pheno = []
 
 class MIM:
     def __init__(self, filename):

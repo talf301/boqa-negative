@@ -8,7 +8,7 @@ __author__ = 'Tal Friedman (talf301@gmail.com)'
 
 
 class Net:
-    def __init__(self, hpo_file, omim_file):
+    def __init__(self, hpo_file, omim_file, neg_omim_file):
         """
         Construct the layers of the net and then "attach" them
         :param hpo_file: path for hp.obo file
@@ -18,6 +18,16 @@ class Net:
         # Create omim and hpo stuff
         mim = MIM(omim_file)
         diseases = [d for d in mim.diseases if d.db == 'OMIM']
+
+        # Deal with loading negatives
+        dis_dict = {dis.id: dis for dis in diseases}
+        neg_omim = MIM(neg_omim_file)
+        for dis in neg_omim:
+            try:
+                dis_dict[dis.id].neg_pheno = dis.phenotype_freqs.keys()
+            except KeyError:
+                continue
+
         self.hpo = HPO(hpo_file)
         self.hpo.filter_to_descendants('HP:0000118')
         # Initialize empty stuff
@@ -119,8 +129,9 @@ class Net:
 if __name__ == '__main__':
     hp = './hp.obo'
     omim = './phenotype_annotation.tab'
+    neg_omim = './negative_phenotype_annotation.tab'
     #cProfile.run('Net(hp, omim)')
-    net = Net('./hp.obo', './phenotype_annotation.tab')
+    net = Net('./hp.obo', './phenotype_annotation.tab', './negative_phenotype_annotation.tab')
     print "Finished!"
     print len(net.hids)
     print len(net.items)

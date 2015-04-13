@@ -21,6 +21,7 @@ class ItemNode:
         """
         self.disease = disease
         self.hids = {}
+        self.neg_hids = []
 
 
     def fix_diseases(self, hid_dict, hpo):
@@ -35,6 +36,13 @@ class ItemNode:
                     self.hids[hid_node] = freq
                 else:
                     self.hids[hid_node] = 1.0
+            except KeyError:
+                pass
+
+        for hp_term in self.disease.neg_pheno:
+            try:
+                hid_node = hid_dict[hpo[hp_term]]
+                self.neg_hids.append(hid_node)
             except KeyError:
                 pass
 
