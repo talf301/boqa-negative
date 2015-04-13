@@ -240,14 +240,7 @@ def script(data_path, out_path, generate, num_samples, default_freq,
             # First, get a disease
             # A uniform sample over all diseases
             if negative_phenotypes:
-                found = False
-                while not found:
-                    disease = random.choice(diseases)
-                    try:
-                        neg_omim_dict[disease]
-                        found = True
-                    except KeyError:
-                        continue
+                disease = random.choice(neg_omim_dict.keys())
             else:
                 disease = random.choice(diseases)
 
