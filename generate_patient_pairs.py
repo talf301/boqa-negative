@@ -122,13 +122,37 @@ def sample_phenotypes(pos_omim_dict, neg_omim_dict, disease, hp, imprecision,
     if phenotypes:
         # Log the original number of phenotypes
         orig_len = len(phenotypes)
+
         # Add imprecision if necessary
         if imprecision:
             phenotypes = add_imprecision(hp, phenotypes)
+
         # Add noise if necessary
         if noise:
             phenotypes = add_noise(int(orig_len * noise), phenotypes, pos_omim_dict)
+
+        # Remove negatively annotated phenotypes if necessary
+        if neg_omim_dis:
+            negative_phenotypes = list(neg_omim_dis.phenotype_freqs.keys())
+            assert negative_phenotypes
+
+            for pheno in negative_phenotypes:
+                try:
+                    # Key may not be found since there are things like
+                    # inheritance patterns in phenotypic annotations
+                    ancestors = list(hpo.get_ancestors(hp[pheno]))
+                except KeyError:
+                    continue
+
+                # Get as string ids and remove root
+                ancestors = map(lambda x: x.id, ancestors)
+                ancestors.remove('HP:0000118')
+
+                # Now remove all ancestors
+                phenotypes = list(set(phenotypes).difference(set(ancestors)))
+
         return phenotypes
+
     else:
         logging.warning("Random phenotype sampling for %s resulted in"
                 " empty set" % disease)

@@ -1,0 +1,4 @@
+*.obo
+*.pyc
+*.tab
+out/
