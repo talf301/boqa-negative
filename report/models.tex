@@ -1,0 +1,39 @@
+\section{Models}
+\label{sec:models}
+
+In this section we describe the models resulting from various modifications to the network, in order to incorporate the desired functionality.
+
+\subsection*{Model 1}
+
+- keep the structure of the network
+
+- only change probabilities as follows:
+
+- let $\text{pos}(i) = \{\text{pos}(i)_1, \hdots, \text{pos}(i)_S\}$, for each $H_i$, index the $S$ diseases for which $H_i$ is explicitly positively annotated
+and
+let $\text{neg}(i) = \{\text{neg}(i)_1, \hdots, \text{neg}(i)_T\}$, the $T$ diseases for which $H_i$ is explicitly negatively annotated
+
+- then let 
+\begin{align*}
+    P\left(H_i = 1 \mid I_{\text{pos}(i)_1}, \hdots, I_{\text{pos}(i)_S}, \bigvee I_{\text{neg}(i)}, \bigwedge H_{\text{chi}(i)}\right)
+        = \left(
+            1 - 
+            \left(
+                \prod_{j=\text{pos}(i)_1}^{\text{pos}(i)_S}
+                \left(1 - I_j \, f_{ji}\right)
+            \right) ^{1 - \bigvee I_{\text{neg}(i)}}
+        \right)
+        ^{1 - \bigvee H_{\text{chi}(i)}}
+\end{align*}
+
+- if there is no frequency $f_{ji}$ set $f_{ji}$ to some random nonzero factor
+
+- NB: the child annotation being on overrides the negative annotation from a disease in this formulation if we admit that $0^0 = 1$ 
+
+\subsection*{Model 2}
+
+- add another hidden layer????
+
+\subsection*{Model 3}
+
+- replace everything with a convnet

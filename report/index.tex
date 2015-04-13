@@ -1,0 +1,120 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bibentry}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{natbib}
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\usepackage{wrapfig}
+\usepackage{xstring}
+\usepackage{url}
+
+\usepackage{nips14submit_e}
+\usepackage{times}
+
+
+\title{Title}
+
+\author{
+Tal Friedman \\
+\texttt{talf301@gmail.com} \\
+\And
+Erin Grant \\
+\texttt{erin.grant@mail.utoronto.ca}
+}
+
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+
+% Reference label commands
+\newcommand{\Table}[1]{Table~\ref{#1}}
+\newcommand{\Algorithm}[1]{Algorithm~\ref{#1}}
+\newcommand{\Section}[1]{Section~\ref{#1}}
+\newcommand{\Example}[1]{\ref{#1}}
+\newcommand{\Figure}[1]{Figure~\ref{#1}}
+\newcommand{\Equation}[1]{Eqn.~(\ref{#1})}
+\newcommand{\Page}[1]{page~\pageref{#1}}
+
+
+%% colour definitions
+\definecolor{pink}{HTML}{F67088}
+\definecolor{orange}{HTML}{CE8F31}
+\definecolor{green}{HTML}{32B165}
+\definecolor{blue}{HTML}{38A7D0}
+\definecolor{purple}{HTML}{A38CF4}
+
+
+%% tikz definitions
+
+% bayes net nodes
+\tikzstyle{item on} = [draw, circle, fill=blue!50, text centered, minimum size=3em]
+\tikzstyle{item off} = [draw, circle, fill=blue!25, text centered, minimum size=3em] 
+\tikzstyle{hidden on} = [draw, circle, fill=orange!50, text centered, minimum size=3em]
+\tikzstyle{hidden off} = [draw, circle, fill=orange!25, text centered, minimum size=3em] 
+\tikzstyle{query on} = [draw, circle, fill=purple!50, text centered, minimum size=3em]
+\tikzstyle{query off} = [draw, circle, fill=purple!25, text centered, minimum size=3em] 
+
+% ontology nodes
+\tikzstyle{disease} = [draw, rectangle, rounded corners, fill=blue!25, text centered, align=center]
+\tikzstyle{phenotype} = [draw, rectangle, rounded corners, fill=purple!25, text centered, align=center]
+
+% algorithm style
+\lstnewenvironment{algorithm}[1][] %defines the algorithm listing environment
+{   
+    \lstset{
+        frame=tb,
+        commentstyle=\itshape,
+        numbers=left, 
+        numberstyle=\tiny,
+        keywordstyle=\color{black}\bfseries,
+        keywords={,input, output, return, in, if, else, foreach, while, },
+        xleftmargin=.04\textwidth,
+        mathescape=true,
+    }
+}
+{}
+
+
+%\nipsfinalcopy % Uncomment for camera-ready version
+
+
+\begin{document}
+
+\nobibliography*
+
+\maketitle
+
+
+\begin{abstract}
+
+    Blah blah blah.
+
+\end{abstract}
+
+
+\input{intro}
+\input{literature_review}
+\input{objectives}
+\input{models}
+\input{experiments}
+\input{results}
+\input{discussion}
+\input{conclusion}
+
+
+\newpage
+\input{temp_figures}
+\newpage
+\input{temp_algos}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{project}
+
+\end{document}

@@ -1,0 +1,20 @@
+\section{Objectives}
+\label{sec:obj}
+
+What are we trying to solve and how are we gonna do it?
+
+
+Let $(Q_1, ..., Q_M)$ be query variables.
+Let $I_1$ be a disease that is explicitly negatively annotated to $Q_1$.
+Let $I_2$ be a disease that is not explicitly annotated to $Q_1$.
+Let $I_3$ be a disease that is explicitly annotated to $Q_1$.
+
+\begin{align*}
+    P(Q_1 = 0, \hdots, Q_M \mid I_1) \\
+    P(Q_1 = 1, \hdots, Q_M \mid I_3) \\
+    P(Q_1 = 0, \hdots, Q_M \mid I_2) \\
+    P(Q_1 = 1, \hdots, Q_M \mid I_2) \\
+    P(Q_1 = 0, \hdots, Q_M \mid I_3) \\
+    P(Q_1 = 1, \hdots, Q_M \mid I_1) 
+\end{align*}
+      

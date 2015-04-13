@@ -1,0 +1,137 @@
+\section{Previous Work}
+\label{sec:lit-rev}
+
+\cite{bauer2012bayesian} introduce Bayesian inference into a query system.
+
+Their network comprises three layers of Boolean variables: an {\it item} layer of diseases, a {\it hidden} layer of phenotypic features, and a {\it query} layer of phenotypic features.
+Each node in the query layer corresponds to exactly one node in the hidden layer.
+
+The causal relationship between a disease and its potential symptoms is modelled as a set of directed edges from a disease node in the {\it item} layer to a subset of the phenotypic nodes in the {\it hidden} layer.
+
+The {\it hidden} layer is then connected to the {\it query} layer in a one-to-one fashion by a directed edge from a phenotype node in the {\it hidden} layer to its correspondent in the {\it query} layer.
+
+Furthermore, there are within-layer connections to model the ontology of symptoms given by the Human Phenotype Ontology (HPO) \cite{kohler2014hpo}.
+
+Within the {\it hidden} layer, there is a directed edge from node $H_i$ to $H_j$ if the annotation of the phenotype $H_i$ implies that the phenotype $H_j$ is also present.
+
+Such an edge is present in the network if the phenotype $H_i$ is a child of phenotype $H_j$ in the HPO; these edges serve the purpose of encoding the {\it annotation propagation rule}: if an item $j$ is annotated to term $i$ then it is implicitly annotated to all ancestors of $i$.
+
+In the case that the edge is present, in the {\it query} layer, there is a directed edge from phenotype $Q_j$ to phenotype $Q_i$ (i.e., an edge in the inverse direction of the edge $H_i \to H_j$).
+
+%See \Figure{fig:bauer-net}.
+%
+%\begin{wrapfigure}{r}{0.5\textwidth}
+%    \label{fig:bauer-net}
+%\end{wrapfigure}
+
+\subsection*{Network construction}
+
+Let $M$ represent the number of terms in the ontology, and let $N$ represent the number of diseases.
+
+Let 
+$\{I_i\}_{i=1}^{N}, 
+\{H_j\}_{j=1}^{M}$ and 
+$\{Q_k\}_{k=1}^{M}$ represent the nodes in the {\it item}, {\it hidden} and {\it query} layers, respectively.
+
+Indices of phenotypic nodes in this network correspond to indices of terms in the HPO;
+i.e., $H_i$ and $Q_i$ together correspond to the $i$th node in the ontology.
+Identify parent-child relations from the ontology in the following manner: 
+let pa$(i) = \{\text{pa}(i)_1, \hdots, \text{pa}(i)_J\}$ denote the $J$ indices of the direct parents of term $i$ in the ontology, 
+and similarly let chi$(i) = \{\text{chi}(i)_1, \hdots, \text{chi}(i)_K\}$ to denote the $K$ indices of the direct children of term $i$ in the ontology.
+
+Furthermore, indices of disease nodes in the network correspond to indices of diseases that are annotated by terms in the HPO.
+Identify the annotations for a disease as follows: let ea$(j) = \{\text{ea}(j)_1, \hdots, \text{ea}(j)_L\}$ denote the indices of the $L$ terms for which the $j$th disease is explicitly annotated.
+
+The local probability distributions for the hidden nodes can then be written as
+\begin{align*}
+    P \left(H_i = 1 \mid I_{\text{ea}(i)}, \bigvee H_{\text{chi}(i)}\right)
+    &= \left(
+        1 - \prod_{j=\text{ea}(i)_1}^{\text{ea}(i)_L}
+        \left(1 - I_j \, f_{ji}\right)
+    \right)
+    ^{1 - \bigvee H_{\text{chi}(i)}}
+\end{align*}
+where $\bigvee$ represents the logical disjunction, and $f_{ji}$ represents the empirical frequency of the occurrence of phenotype $i$ with disease $j$.
+This formulation captures the annotation propagation rule within the hidden, since it evaluates to $1$ if $\bigvee H_{\text{chi}(i)} = 1$; that is, if any child annotations are active.
+As well, it captures that the hidden node is inactive with probability 1 if all diseases are inactive (i.e., $I_i = 0, \forall i$), and otherwise the probabillity of activity in the hidden state is a function of the emprical association of disease and symptom.
+
+The local probability distribution for the query nodes, given the states of $H_i$ and $Q_{\text{pa}(i)}$, can be written as
+\begin{align*}
+    \begin{aligned}[c]
+        P\left(Q_i = 0 \mid H_i = 1, \bigwedge Q_{\text{pa}(i)} = 0\right) &= 1 \\
+        P\left(Q_i = 1 \mid H_i = 1, \bigwedge Q_{\text{pa}(i)} = 0\right) &= 0 \\
+        P\left(Q_i = 0 \mid H_i = 1, \bigwedge Q_{\text{pa}(i)} = 1\right) &= \beta \\
+        P\left(Q_i = 1 \mid H_i = 1, \bigwedge Q_{\text{pa}(i)} = 1\right) &= 1 - \beta \\
+    \end{aligned}
+    \qquad
+    \begin{aligned}[c]
+        P\left(Q_i = 0 \mid H_i = 0, \bigwedge Q_{\text{pa}(i)} = 0\right) &= 1 \\
+        P\left(Q_i = 1 \mid H_i = 0, \bigwedge Q_{\text{pa}(i)} = 0\right) &= 0 \\
+        P\left(Q_i = 0 \mid H_i = 0, \bigwedge Q_{\text{pa}(i)} = 1\right) &= 1 - \alpha \\
+        P\left(Q_i = 1 \mid H_i = 0, \bigwedge Q_{\text{pa}(i)} = 1\right) &= \alpha
+    \end{aligned}
+\end{align*}
+where $\bigwedge$ represents the logical conjunction, $\beta$ represents the probability of a false negative (i.e., $H_i = 1$ but $Q_i = 0$), and $\alpha$ represents the probability of a false positive (i.e., $Q_i = 1$ but $H_i = 0)$.
+
+Now, defining a variable $m_{xyz\mid QH}$ by
+\begin{align*}
+    m_{xyz\mid QH} 
+    &= \left| 
+        \left\{k \mid
+        \left(
+            Q_k = x 
+        \right) \wedge  \left(
+            H_k = y
+        \right) \wedge  \left(
+            \bigwedge Q_{\text{pa}(k)} = z
+        \right)
+        \right\}
+    \right|,
+\end{align*}
+the joint probability of the query nodes $Q_i$ may be written as
+\begin{align*}
+    \prod_{i=1}^M P\left(Q_i \mid H_i, \bigwedge Q_{\text{pa}(i)}\right)
+    &=  \beta^{\,m_{011\mid QH}}
+    \;(1 - \beta)^{m_{111\mid QH}}
+    \;\alpha^{m_{001\mid QH}}
+    \;(1 - \alpha)^{m_{101\mid QH}},
+\end{align*}
+under the assumption that the invalid configurations $m_{110\mid QH}$ and $m_{100\mid QH}$ occur with probability zero,
+and using the simplification that the configurations $m_{010\mid QH}$ and $m_{000\mid QH}$ have probability one.
+
+The joint probability distribution over the network is then realised as
+\begin{align}
+    &P(I_1, \hdots, I_N, H_1, \hdots, H_M, Q_1, \hdots, Q_M) \nonumber\\
+    &=  P(I_1, \hdots, I_N) 
+    \; \prod_{i=1}^M P\left(H_i \mid \bigvee I_{\text{ea}(i)}, \bigvee H_{\text{chi}(i)}\right)
+    \; P\left(Q_i \mid H_i, \bigwedge Q_{\text{pa}(i)}\right). \label{eq:joint}
+\end{align}
+
+\subsection*{Inference}
+
+The marginal probability of a configuration of the disease nodes $I_1, \hdots, I_N$ in the item layer, given some phenotypic evidence $Q_1, \hdots, Q_M$, is given by marginalising over $\vec{H}$ as
+\begin{align*}
+    P(I_1, \hdots, I_n \mid Q_1, \hdots, Q_M)
+    &= \frac{\sum_{\vec{H}} P(I_1, \hdots, I_n, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q)} \\
+    &= \frac{\sum_{\vec{H} \in \{0, 1\}^M} P(I_1, \hdots, I_n, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q)} \\
+\end{align*}
+
+The goal of this model is to find the configuration of diseases with highest posterior probability, given some phenotypic evidence.
+This is a MAP inference problem, and so may be solved by maximising the product of the likelihood and the prior; i.e.,
+\begin{align*}
+    &\argmax_{(I_1, \hdots, I_N)} \;
+    P(I_1, \hdots, I_N \mid Q_1, \hdots, Q_M) \\
+    &= \argmax_{(I_1, \hdots, I_N)} \;
+    \frac{P(Q_1, \hdots, Q_M \mid I_1, \hdots, I_N )\; P(I_1, \hdots, I_N)}{P(Q)} \\
+    &= \argmax_{(I_1, \hdots, I_N)} \;
+    P(Q_1, \hdots, Q_M \mid I_1, \hdots, I_N )\; P(I_1, \hdots, I_N) \\
+    &= \argmax_{(I_1, \hdots, I_N)} \;
+    P(I_1, \hdots, I_N)
+    \;\sum_{\vec{H} \in \{0, 1\}^M} \; \prod_{i=1}^M \; P\left(H_i \mid \bigvee I_{\text{ea}(i)}, \bigvee H_{\text{chi}(i)}\right)
+    \; P\left(Q_i \mid H_i, \bigwedge Q_{\text{pa}(i)}\right).
+\end{align*}
+
+\subsection*{Complexity restrictions}
+
+- use probabilistic state propagation from disease to hidden for weakly associated symptoms; all other propagations are deterministic (determined by Eqn (1))
+- make the simplification that there can only be one disease active
