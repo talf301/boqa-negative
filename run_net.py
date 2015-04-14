@@ -20,11 +20,37 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
     hpo_files = []
     try:
         files = os.listdir(patient_path)
-        hpo_files = [f for f in files if f.endswith('_hpo.txt')]
+        hpo_files = [os.path.join(patient_path, f) for f in files if f.endswith('_hpo.txt')]
     except OSError:
         hpo_files.append(patient_path)
 
-    #for hpo_file in hpo_files:
+    for hpo_file in hpo_files:
+        phenos = open(hpo_file).readline().split(',')
+        net.set_query(phenos)
+        if k_freqs:
+            res = net.diagnose(type='k_freq', k=k_freqs)
+        elif p_sampling:
+            res = net.diagnose(type='sample_p',n_samples=sampling,p=p_sampling)
+        elif sampling:
+            res = net.diagnose(type='sample',n_samples=sampling)
+        else:
+            res = net.diagnose()
+        out_file = open(os.path.join(out_path, hpo_file + '.res'), 'w')
+        for id, prob in res[:20]:
+            out_file.write('\t'.join([id, prob]) + '\n')
+        out_file.close()
+        rank_file = open(os.path.join(out_path, hpo_file + '.rank'), 'w')
+        actual_dis = hpo_file.split('/')[-1].split('_')[0]
+        rank = 0
+        prob = 0
+        for i, dis in enumerate(res):
+            if dis[0] == actual_dis:
+                rank = i
+                prob = dis[1]
+                break
+        rank_file.write('\t'.join([rank, prob]) + '\n')
+        rank_file.close()
+
 
 
 def parse_args(args):
