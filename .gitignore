@@ -1,4 +1,13 @@
-*.obo
+# Python
 *.pyc
+
+# Latex
+*.aux
+*.log
+*.out
+*.pdf
+
+# Project-specific
+*.obo
 *.tab
 out/
