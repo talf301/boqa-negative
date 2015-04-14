@@ -11,6 +11,7 @@ if __name__ == '__main__':
             disorder = d['disorders'][0]['id']
         except KeyError:
             continue
+        disorder = disorder.split(':')[1]
 
         pos_phenos = [f['id'] for f in d.get('features', []) if f['observed'] == 'yes']
         # Just in case, not using this atm
