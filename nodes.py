@@ -47,6 +47,32 @@ class ItemNode:
                 pass
 
 
+    def get_marginal_sampling_p(self, hids, alpha, beta, interested_quer, samples, n_samples=1, p=0.01):
+        freqs = self.hids.items()
+        hid_freq_1 = [x for x in freqs if x[1] == 1.0]
+        to_sample = [x for x in freqs if x[1] < 1.0]
+
+        # Set up base annotations, fixed stuff
+        base_annot = bitarray(len(hids))
+        base_annot.setall(False)
+        for hid_node, freq in hid_freq_1:
+            base_annot = base_annot | hid_node.bitarr
+
+        marg = 0
+
+        for i in xrange(n_samples):
+            annot = base_annot.copy()
+            for hid_node, freq in to_sample:
+                if random.uniform(0,1) < freq:
+                    annot = annot | (hid_node.bitarr)
+
+            annot = annot | samples[i]
+            for neg_hid in self.neg_hids:
+                annot = annot & ~neg_hid.bitarr
+            marg += self._compute_marginal(annot, alpha, beta, interested_quer)
+
+        return marg / n_samples
+
     def get_marginal_sampling(self, hids, alpha, beta, interested_quer, samples=100):
         freqs = self.hids.items()
         hid_freq_1 = [x for x in freqs if x[1] == 1.0]
