@@ -1,8 +1,9 @@
 from hpo import HP, HPO
 from omim import Disease, MIM
 from nodes import HiddenNode, ItemNode, QueryNode
+from bitarray import bitarray
 import cProfile
-import logging
+import random
 
 __author__ = 'Tal Friedman (talf301@gmail.com)'
 
@@ -105,7 +106,7 @@ class Net:
         self.interest_quer.sort()
 
 
-    def diagnose(self, type='no_freq'):
+    def diagnose(self, type='no_freq', k=5, n_samples=1000, p=0.001, alpha=0.001, beta=0.1):
         """
         Do the basic diagnosis, computing marginals and sorting and then returning the top 20 possibilities
         :return: a list of the top 5 diseases with probabilities
@@ -115,15 +116,27 @@ class Net:
                            , dis.get_marginal_no_freq(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
         elif type == 'k_freq':
             dis_scores = [(dis.disease.id,
-                           dis.get_marginal_k_freq(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
+                           dis.get_marginal_k_freq(self.hids, 0.001, 0.1, self.interest_quer, k=k)) for dis in self.items]
         elif type == 'sample':
             dis_scores = [(dis.disease.id,
-                           dis.get_marginal_sampling(self.hids, 0.001, 0.1, self.interest_quer)) for dis in self.items]
+                           dis.get_marginal_sampling(self.hids, 0.001, 0.1, self.interest_quer, samples=n_samples)) for dis in self.items]
+        elif type == 'sample_p':
+            # Generate samples first
+            samples = []
+            for i in xrange(n_samples):
+                annot = bitarray(len(self.hids))
+                annot.setall(False)
+                for hid_node in self.hids:
+                    if random.uniform(0,1) < p:
+                        annot = annot | hid_node.bitarr
+                samples.append(annot)
+            dis_scores = [(dis.disease.id,
+                           dis.get_marginal_sampling_p(self.hids, 0.001, 0.1, self.interest_quer, samples, n_samples=n_samples)) for dis in self.items]
 
         den = sum(d[1] for d in dis_scores)
         dis_scores = [(d[0], d[1]/den) for d in dis_scores]
         dis_scores.sort(key=lambda x: x[1], reverse=True)
-        return dis_scores[:20]
+        return dis_scores
 
 
 if __name__ == '__main__':
@@ -138,9 +151,9 @@ if __name__ == '__main__':
     print len(net.quers)
     net.set_query(open("./First_3450_356_hpo.txt", 'r').readline().split(','))
     #print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
-    type = 'sample'
+    type = 'sample_p'
     cProfile.run('net.diagnose(type=type)')
-    print net.diagnose(type=type)
+    print net.diagnose(type=type)[:20]
 
 
 
