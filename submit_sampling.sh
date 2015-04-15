@@ -35,7 +35,7 @@ function sge_wait {
     done
 }
 
-logdir=~/sge_logs/boqa/"$out"
+logdir=~/sge_logs/boqa/`basename $out`
 mkdir -pv "$logdir"
 mkdir -pv "$out"
 mkdir -pv "$out/scripts"
@@ -51,7 +51,6 @@ for file in $dir/*_hpo.txt; do
 #!/usr/bin/env bash
 #$ -V
 #$ -N "BOQA_$f"
-#$ -pe parallel "$processors"
 #$ -l h_vmem="$memory"
 #$ -e $logdir
 #$ -o $logdir
@@ -61,17 +60,17 @@ set -eu
 set -o pipefail
 temp=\$TMPDIR/$f
 
-mkdir -pv $temp
+mkdir -pv \$temp
 
 echo "Current directory: \$(pwd)" >&2
 echo "Temp directory: \$temp" >&2
-echo "Input file: $dir/$f_hpo.txt" >&2
+echo "Input file: $dir/$f"_hpo.txt >&2
 echo "Target output director: $out" >&2
 
-test -s $dir/$f_hpo.txt
+test -s "$dir/$f"_hpo.txt
 
 # Run the actual python script
-python $data/run_net.py -D $data -P $dir/$f_hpo.txt -O \$temp -s 1000
+/filer/tools/python/Python-2.7.6/python $data/run_net.py -D $data -P "$dir/$f"_hpo.txt -O \$temp -s 1000
 
 # Make sure moving finishes correctly
 mv -v \$temp/\* $out
