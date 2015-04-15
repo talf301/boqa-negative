@@ -11,7 +11,7 @@ __author__ = 'Tal Friedman (talf301@gmail.com)'
 
 def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **kwargs):
     try:
-        net = Net(os.path.join(data_path, '/hp.obo'), os.path.join(data_path, '/phenotype_annotations.tab'), os.path.join(data_path, '/negative_phenotype_annotation.tab'))
+        net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'))
     except IOError, e:
         logging.error(e)
         sys.exit(1)
@@ -25,7 +25,7 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
         hpo_files.append(patient_path)
 
     for hpo_file in hpo_files:
-        phenos = open(hpo_file).readline().split(',')
+        phenos = open(hpo_file).readline().strip().split(',')
         net.set_query(phenos)
         if k_freqs:
             res = net.diagnose(type='k_freq', k=k_freqs)
@@ -35,20 +35,20 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
             res = net.diagnose(type='sample',n_samples=sampling)
         else:
             res = net.diagnose()
-        out_file = open(os.path.join(out_path, hpo_file + '.res'), 'w')
+        out_file = open(os.path.join(out_path, hpo_file.split('/')[-1] + '.res'), 'w')
         for id, prob in res[:20]:
-            out_file.write('\t'.join([id, prob]) + '\n')
+            out_file.write('\t'.join([id, str(prob)]) + '\n')
         out_file.close()
-        rank_file = open(os.path.join(out_path, hpo_file + '.rank'), 'w')
+        rank_file = open(os.path.join(out_path, hpo_file.split('/')[-1] + '.rank'), 'w')
         actual_dis = hpo_file.split('/')[-1].split('_')[0]
         rank = 0
         prob = 0
         for i, dis in enumerate(res):
             if dis[0] == actual_dis:
-                rank = i
+                rank = i + 1
                 prob = dis[1]
                 break
-        rank_file.write('\t'.join([rank, prob]) + '\n')
+        rank_file.write('\t'.join([str(rank), str(prob)]) + '\n')
         rank_file.close()
 
 
