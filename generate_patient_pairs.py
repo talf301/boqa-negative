@@ -103,12 +103,14 @@ def sample_phenotypes(pos_omim_dict, neg_omim_dict, disease, hp, imprecision,
         pos_omim_dis = pos_omim_dict[disease]
     except KeyError:
         logging.warning('Could not find OMIM entry for %s' % disease)
-
+    
     # Grab the negative omim.Disease for this OMIM ID number
+    neg_omim_dis = None
     try:
         neg_omim_dis = neg_omim_dict[disease]
     except KeyError:
-        logging.warning('Could not find negative annotations for ID %s' % disease)
+        pass
+        #logging.warning('Could not find negative annotations for ID %s' % disease)
 
     # If frequency available, we will sample, otherwise we use default freq
     phenotype_freqs = pos_omim_dis.phenotype_freqs
@@ -134,7 +136,7 @@ def sample_phenotypes(pos_omim_dict, neg_omim_dict, disease, hp, imprecision,
         # Remove negatively annotated phenotypes if necessary
         if neg_omim_dis:
             negative_phenotypes = list(neg_omim_dis.phenotype_freqs.keys())
-            assert negative_phenotypes
+            #assert negative_phenotypes
 
             for pheno in negative_phenotypes:
                 try:
@@ -208,14 +210,14 @@ def load_data(data_path):
     pos_omim = filter(lambda d:d.db == 'OMIM', pos_mim.diseases)
     for o in pos_omim:
         o.phenotype_freqs = {pheno:freq for pheno,freq in o.phenotype_freqs.iteritems() if hp.hps.has_key(pheno)}
-    pos_omim_dict = {dis.id:dis for dis in pos_omim}
+    pos_omim_dict = {dis.id:dis for dis in pos_omim if dis.phenotype_freqs.keys()}
 
     # Load the negative annotations
     neg_mim = MIM(os.path.join(data_path, 'negative_phenotype_annotation.tab'))
     neg_omim = filter(lambda d:d.db == 'OMIM', neg_mim.diseases)
     for o in neg_omim:
         o.phenotype_freqs = {pheno:freq for pheno,freq in o.phenotype_freqs.iteritems() if hp.hps.has_key(pheno)}
-    neg_omim_dict = {dis.id:dis for dis in neg_omim}
+    neg_omim_dict = {dis.id:dis for dis in neg_omim if dis.phenotype_freqs.keys() and dis.id in pos_omim_dict.keys()}
 
     # Get the disease possibilities
     diseases = [d.id for d in pos_mim.diseases if d.db == 'OMIM']
@@ -242,7 +244,7 @@ def script(data_path, out_path, generate, num_samples, default_freq,
             if negative_phenotypes:
                 disease = random.choice(neg_omim_dict.keys())
             else:
-                disease = random.choice(diseases)
+                disease = random.choice(pos_omim_dict.keys())
 
             # Name patients based on disease and iteration
             new_pair = ['First_' + disease + '_' + str(i) + '.vcf',
@@ -258,15 +260,17 @@ def script(data_path, out_path, generate, num_samples, default_freq,
         for i in range(num_samples):
             # First, get a disease
             # A uniform sample over all diseases
-            disease = random.choice(diseases)
+            if negative_phenotypes:
+                disease = random.choice(neg_omim_dict.keys())
+            else:
+                disease = random.choice(pos_omim_dict.keys())
 
             # Name patient based on disease and iteration
             new_patient = disease + '_' + str(i) + '.vcf'
 
             # Finally, infect patient with disease
             infect_pheno(os.path.join(out_path, new_patient), disease, pos_omim_dict,
-                neg_omim_dict, hp, imprecision, noise, default_freq,
-                negative_phenotypes)
+                neg_omim_dict, hp, imprecision, noise, default_freq)
 
 def parse_args(args):
     parser = ArgumentParser()
