@@ -43,7 +43,7 @@ mkdir -pv "$out/scripts"
 for file in $dir/*_hpo.txt; do
 	f=`basename $file _hpo.txt`
 	if [[ -s "$out/$f"_hpo.txt.rank ]]; then
-		echo "Output file already exists "$out/$f"_hpo.txt.rank" >&2
+		echo "Output file already exists "$out/$f".finished" >&2
 		continue
 	fi
 	script="$out/scripts/dispatch_$f.sh"
