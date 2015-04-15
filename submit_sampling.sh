@@ -73,7 +73,7 @@ test -s "$dir/$f"_hpo.txt
 /filer/tools/python/Python-2.7.6/python $data/run_net.py -D $data -P "$dir/$f"_hpo.txt -O \$temp -s 1000
 
 # Make sure moving finishes correctly
-mv -v \$temp/\* $out
+mv -v \$temp/* $out
 touch "$out/$f".finished
 EOF
 
