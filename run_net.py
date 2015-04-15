@@ -11,7 +11,7 @@ __author__ = 'Tal Friedman (talf301@gmail.com)'
 
 def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **kwargs):
     try:
-        net = Net(os.path.join(data_path, '/hp.obo'), os.path.join(data_path, '/phenotype_annotations.tab'), os.path.join(data_path, '/negative_phenotype_annotation.tab'))
+        net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'))
     except IOError, e:
         logging.error(e)
         sys.exit(1)
@@ -37,7 +37,7 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
             res = net.diagnose()
         out_file = open(os.path.join(out_path, hpo_file + '.res'), 'w')
         for id, prob in res[:20]:
-            out_file.write('\t'.join([id, prob]) + '\n')
+            out_file.write('\t'.join([id, str(prob)]) + '\n')
         out_file.close()
         rank_file = open(os.path.join(out_path, hpo_file + '.rank'), 'w')
         actual_dis = hpo_file.split('/')[-1].split('_')[0]
@@ -48,7 +48,7 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
                 rank = i
                 prob = dis[1]
                 break
-        rank_file.write('\t'.join([rank, prob]) + '\n')
+        rank_file.write('\t'.join([str(rank), str(prob)]) + '\n')
         rank_file.close()
 
 
