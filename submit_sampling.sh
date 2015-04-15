@@ -22,6 +22,7 @@ out=$2
 max_jobs=100
 memory=5g
 processors=1
+data=/dupa-filer/talf/boqa-negative/
 
 function sge_wait {
     sleep_time=1  # seconds
@@ -41,4 +42,44 @@ mkdir -pv "$out/scripts"
 
 for file in $dir/*_hpo.txt; do
 	f=`basename $file _hpo.txt`
-	
+	if [[ -s "$out/$f"_hpo.txt.rank ]]; then
+		echo "Output file already exists "$out/$f"_hpo.txt.rank" >&2
+		continue
+	fi
+	script="$out/scripts/dispatch_$f.sh"
+	cat > "$script" <<EOF
+#!/usr/bin/env bash
+#$ -V
+#$ -N "BOQA_$f"
+#$ -pe parallel "$processors"
+#$ -l h_vmem="$memory"
+#$ -e $logdir
+#$ -o $logdir
+#$ -l hostname="supa*"
+
+set -eu
+set -o pipefail
+temp=\$TMPDIR/$f
+
+mkdir -pv $temp
+
+echo "Current directory: \$(pwd)" >&2
+echo "Temp directory: \$temp" >&2
+echo "Input file: $dir/$f_hpo.txt" >&2
+echo "Target output director: $out" >&2
+
+test -s $dir/$f_hpo.txt
+
+# Run the actual python script
+python $data/run_net.py -D $data -P $dir/$f_hpo.txt -O \$temp -s 1000
+
+# Make sure moving finishes correctly
+mv -v \$temp/\* $out
+touch "$out/$f".finished
+EOF
+
+	# Wait for space on cluster
+	sge_wait
+	# Submit job
+	qsub -S /bin/sh "$script"
+done
