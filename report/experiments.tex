@@ -1,9 +1,68 @@
 \section{Experiments}
 \label{sec:exp}
 
-\subsection*{Artificial data generation}
+\subsection{Artificial data generation}
 
-- if hidden layer node is not explicitly negatively annotated 
-then have the likelihood for the node nonzero
+The HPO \cite{kohler2014hpo} is a directed acyclic graph that depicts an
+ontology of 10 476 phenotypes.
+%
+It specifies annotations for 6575 diseases, 471 of which possess negative
+annotations.
+%
+In addition to using the ontology as expert information in the model
+construction and inference procedures, we exploit it to generate patients
+for testing.
+%
+\footnote{
+    Rare genetic diseases is, true to its name, a domain in which there are few
+    examples, so we have to generate more test data to fill the void.
+}
+%
+We spawned 500 patients infected with diseases that
+possess positive annotations but not necessarily negative annotations, and then
+generated a further 471 patients each infected with a unique
+negatively-annotated disease.
 
-- proposed formulation: 
+We generated and infected patients in the following manner:
+%
+\begin{enumerate}
+    \item \label{enum:patgen1}
+        For a given disease, we sampled each of the disease's annotated
+        symptoms with probability equal to the empirical association of symptom
+        and disease, as specified by the HPO.
+    \item \label{enum:patgen2}
+        To simulate noise in the patient queries, we added a number
+        of unrelated symptoms to the patient query by sampling with uniform
+        probability over all symptoms.
+        \footnote{
+            For all experimental results, we chose the number of noise symptoms
+            to be half the number of symptoms generated in Step
+            \ref{enum:patgen1}.
+        }
+    \item To simulate imprecision in the patient queries, for each symptom
+        generated in Steps \ref{enum:patgen1} and \ref{enum:patgen2}, with some
+        probability we replaced the symptom with one of its ancestors in the
+        HPO.
+        \footnote{
+            Each symptom is replaced by another symptom chosen uniformly from a
+            set containing all ancestors of the symptom and the symptom itself.
+            In this way, there is some small probability that the symptom is
+            retained, and thus the query is made no less precise.
+        }
+\end{enumerate}
+%
+We will refer to the data generated in this way as the {\it artificial patient
+data}.
+
+In addition to this artificially generated data, we tested all models
+on 101 patient queries obtained from real-life clinician-patient
+encounters, which we refer to as the {\it naturalistic patient data}.
+%
+\footnote{
+    We take the naturalistic patients data from the PhenoTips patients
+    repository \cite{phenotips}.
+    The data is not publicly available.
+}
+
+
+
