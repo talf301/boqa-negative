@@ -32,7 +32,7 @@ def script(data_path, out_path, num_diseases, **kwargs):
                     rank = int(list(f)[0].split('\t')[0])
                     try:
                         rank_counts[rank] += 1
-                        total_count += 0
+                        total_count += 1
                     except IndexError:
                         print 'Ignored a rank count because it exceeded the'
                         'specified rank consideration range:'
@@ -40,7 +40,7 @@ def script(data_path, out_path, num_diseases, **kwargs):
 
         # mean reciprocal rank = harmonic mean of ranks
         mean_reciprocal_rank = np.sum(np.reciprocal([r for r in rank_counts
-                                                        if r > 0]))
+                                                     if r > 0]))
         mean_reciprocal_rank = np.divide(mean_reciprocal_rank, total_count)
         mean_reciprocal_rank_dict[experimental_condition] = str(mean_reciprocal_rank)
 
@@ -110,7 +110,7 @@ def parse_args(args):
     parser.add_argument('--out_path', '-O', metavar='OUT', required=True,
             help='Directory in which to write results')
     parser.add_argument('--num_diseases', '-N', metavar='NUM', type=int,
-            default=500, help='Number of diseases used to generate results')
+            default=7000, help='Number of diseases used to generate results')
     parser.add_argument('--logging', default='WARNING',
             choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
             help='logging level')
