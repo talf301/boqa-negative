@@ -17,6 +17,7 @@ def script(data_path, out_path, num_diseases, **kwargs):
             raise
 
     mean_reciprocal_rank_dict = {}
+    total_count = 0
 
     # Assume the results data path contains folders for different experimental
     # conditions
@@ -26,21 +27,21 @@ def script(data_path, out_path, num_diseases, **kwargs):
                                                            experimental_condition)):
             name, extension = os.path.splitext(patient_result_file)
             if extension == '.rank':
-                #name = name.split('_')
-                #disease_id, patient_id = name[0], name[1]
                 with open(os.path.join(cwd, data_path, experimental_condition,
                                        patient_result_file)) as f:
                     rank = int(list(f)[0].split('\t')[0])
                     try:
                         rank_counts[rank] += 1
+                        total_count += 0
                     except IndexError:
-                        print experimental_condition + ':', rank
+                        print 'Ignored a rank count because it exceeded the'
+                        'specified rank consideration range:'
+                        '\t' + experimental_condition + ':', rank
 
         # mean reciprocal rank = harmonic mean of ranks
         mean_reciprocal_rank = np.sum(np.reciprocal([r for r in rank_counts
                                                         if r > 0]))
-        mean_reciprocal_rank = np.divide(mean_reciprocal_rank,
-                                            np.sum(rank_counts))
+        mean_reciprocal_rank = np.divide(mean_reciprocal_rank, total_count)
         mean_reciprocal_rank_dict[experimental_condition] = str(mean_reciprocal_rank)
 
         # ROC and precision / recall stuff
@@ -52,28 +53,30 @@ def script(data_path, out_path, num_diseases, **kwargs):
         ROC_to_write = []
         PR_to_write = []
 
+        true_pos = 0
+        false_neg = np.sum(rank_counts)
+        false_pos = 0
+        true_neg = np.sum([j * rank_counts[j] for j in range(len(rank_counts))])
+
         for i in range(len(rank_counts)):
-            true_pos = np.sum(rank_counts[:i])
-            false_neg = np.sum(rank_counts[i:])
 
-            false_pos = np.sum([(j-1)*rank_counts[j] for j in
-                                range(len(rank_counts[:i]))])
-            true_neg = np.sum([(j)*rank_counts[j] for j in
-                               range(i, len(rank_counts))])
+            # brute force computation
+            #true_pos = np.sum(rank_counts[:i])
+            #false_neg = np.sum(rank_counts[i:])
+            #false_pos = np.sum([(j-1)*rank_counts[j] for j in
+            #                    range(len(rank_counts[:i]))])
+            #true_neg = np.sum([(j)*rank_counts[j] for j in
+            #                   range(i, len(rank_counts))])
 
-            # find out how many categories there actually are
-            #assert (true_pos + false_neg + false_pos + true_neg) == num_diseases
+            true_pos += rank_counts[i-1]
+            false_neg -= rank_counts[i-1]
+            false_pos += (i-2) * rank_counts[i-1]
+            true_neg -= (i-2) * rank_counts[i-1]
 
             recall = true_pos / (true_pos + false_neg) # true positive rate
             precision = true_pos / (true_pos + false_pos) # positive pred value
             specificity = true_neg / (false_pos + true_neg) # true negative rate
             fall_out = false_pos / (false_pos + true_neg) # false positive rate
-
-            #print('index', i)
-            #print(rank_counts[:8])
-            #print('true_pos false_neg false_pos true_neg')
-            #print(true_pos, false_neg, false_pos, true_neg)
-            #raw_input()
 
             ROC_to_write.append((str(fall_out) + ',' +  str(recall) + '\n'))
             PR_to_write.append((str(recall) + ',' +  str(precision) + '\n'))
@@ -107,7 +110,7 @@ def parse_args(args):
     parser.add_argument('--out_path', '-O', metavar='OUT', required=True,
             help='Directory in which to write results')
     parser.add_argument('--num_diseases', '-N', metavar='NUM', type=int,
-            default=100, help='Number of diseases used to generate results')
+            default=500, help='Number of diseases used to generate results')
     parser.add_argument('--logging', default='WARNING',
             choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
             help='logging level')
@@ -116,9 +119,8 @@ def parse_args(args):
 def main(args=sys.argv[1:]):
     args = parse_args(args)
     logging.basicConfig(level=args.logging)
-    #cProfile.run(script(**vars(args)))
     script(**vars(args))
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    cProfile.run('sys.exit(main())')
