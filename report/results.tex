@@ -237,5 +237,119 @@
             };
         \end{axis}
     \end{tikzpicture}
-    \caption{Mean reciprocal rank plot for naturalistic patients, for only diseases with negative annotations.}
+    \caption{Mean reciprocal rank plot for artificial patients, for only diseases with negative annotations.}
+\end{figure}
+
+\begin{figure}[h]
+    \begin{tikzpicture}
+        \begin{axis}[
+            xbar stacked,
+            xlabel={count},
+            xmin=0,
+            legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+            symbolic y coords={
+                % UPSIDE DOWN!
+                naturalistic patients IC-sampling,
+                naturalistic patients $p$-sampling,
+                naturalistic patients sampling,
+                naturalistic patients $k$-least frequency annotations,
+                naturalistic patients no frequency annotations,
+                artificial patients IC-sampling,
+                artificial patients $p$-sampling,
+                artificial patients sampling,
+                artificial patients $k$-least frequency annotations,
+                artificial patients no frequency annotations,
+            },
+            ytick=data,
+            yticklabel style={text height=1.5ex}, % To make sure the text labels are nicely aligned
+            ]
+            \addplot coordinates{
+                (40,artificial patients no frequency annotations)
+                (40,artificial patients $k$-least frequency annotations)
+                (46,artificial patients sampling)
+                (35,artificial patients $p$-sampling)
+                (34,artificial patients IC-sampling)
+                (20,naturalistic patients no frequency annotations)
+                (17,naturalistic patients $k$-least frequency annotations)
+                (19,naturalistic patients sampling)
+                (16,naturalistic patients $p$-sampling)
+                (18,naturalistic patients IC-sampling)
+            };
+            \addlegendentry{rank one}
+            \addplot coordinates{
+                (18,artificial patients no frequency annotations)
+                (17,artificial patients $k$-least frequency annotations)
+                (20,artificial patients sampling)
+                (13,artificial patients $p$-sampling)
+                (15,artificial patients IC-sampling)
+                (9 ,naturalistic patients no frequency annotations)
+                (13,naturalistic patients $k$-least frequency annotations)
+                (8 ,naturalistic patients sampling)
+                (8 ,naturalistic patients $p$-sampling)
+                (7 ,naturalistic patients IC-sampling)
+            };
+            \addlegendentry{ranks two to five}
+            \addplot coordinates{
+                (9 ,artificial patients no frequency annotations)
+                (14,artificial patients $k$-least frequency annotations)
+                (15,artificial patients sampling)
+                (14,artificial patients $p$-sampling)
+                (13,artificial patients IC-sampling)
+                (13,naturalistic patients no frequency annotations)
+                (5 ,naturalistic patients $k$-least frequency annotations)
+                (8 ,naturalistic patients sampling)
+                (5 ,naturalistic patients $p$-sampling)
+                (6 ,naturalistic patients IC-sampling)
+            };
+            \addlegendentry{ranks six to twenty}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Binned ranking plot for artificial and naturalistic patients, each with a general disease.}
+\end{figure}
+
+\begin{figure}[h]
+    \begin{tikzpicture}
+        \begin{axis}[
+            xbar stacked,
+            xlabel={count},
+            xmin=0,
+            legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+            symbolic y coords={
+                % UPSIDE DOWN!
+                artificial patients IC-sampling,
+                artificial patients $p$-sampling,
+                artificial patients sampling,
+                artificial patients $k$-least frequency annotations,
+                artificial patients no frequency annotations,
+            },
+            ytick=data,
+            yticklabel style={text height=1.5ex}, % To make sure the text labels are nicely aligned
+            ]
+            \addplot coordinates{
+                (57,artificial patients no frequency annotations)
+                (58,artificial patients $k$-least frequency annotations)
+                (61,artificial patients sampling)
+                (50,artificial patients $p$-sampling)
+                (49,artificial patients IC-sampling)
+            };
+            \addlegendentry{rank one}
+            \addplot coordinates{
+                (16,artificial patients no frequency annotations)
+                (17,artificial patients $k$-least frequency annotations)
+                (16,artificial patients sampling)
+                (12,artificial patients $p$-sampling)
+                (12,artificial patients IC-sampling)
+            };
+            \addlegendentry{ranks two to five}
+            \addplot coordinates{
+                (13,artificial patients no frequency annotations)
+                (16,artificial patients $k$-least frequency annotations)
+                (16,artificial patients sampling)
+                (19,artificial patients $p$-sampling)
+                (19,artificial patients IC-sampling)
+            };
+            \addlegendentry{ranks six to twenty}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Binned ranking plot for artificial patients, each infected with a disease that has negative annotations.}
 \end{figure}

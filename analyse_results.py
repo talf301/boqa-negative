@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser
-import cProfile
 import logging
 import numpy as np
 import os
@@ -16,8 +15,14 @@ def script(data_path, out_path, num_diseases, **kwargs):
         if not os.path.isdir(out_path):
             raise
 
-    mean_reciprocal_rank_dict = {}
     total_count = 0
+
+    mean_reciprocal_rank_dict = {}
+
+    rank_bin_dict = {}
+    rank_bin_dict['one'] = []
+    rank_bin_dict['two to five'] = []
+    rank_bin_dict['six to twenty'] = []
 
     # Assume the results data path contains folders for different experimental
     # conditions
@@ -37,14 +42,11 @@ def script(data_path, out_path, num_diseases, **kwargs):
                         print 'Ignored a rank count because it exceeded the'
                         'specified rank consideration range:'
                         '\t' + experimental_condition + ':', rank
-        
-        bin_file = open(os.path.join(data_path, experimental_condition + '_bin.csv'), 'w')
-        bin_file.write(','.join(['bin', 'num']) + '\n')
-        bin_file.write(','.join(['1', str(rank_counts[1])]) + '\n')
-        bin_file.write(','.join(['5', str(sum(rank_counts[2:5]))]) + '\n')
-        bin_file.write(','.join(['20', str(sum(rank_counts[6:20]))]) + '\n')
-        bin_file.close()
-        
+
+        # rank bins
+        rank_bin_dict['one'].append(str(int(rank_counts[1])) + ',' + experimental_condition + '\n')
+        rank_bin_dict['two to five'].append(str(int(sum(rank_counts[2:5]))) + ',' + experimental_condition + '\n')
+        rank_bin_dict['six to twenty'].append(str(int(sum(rank_counts[6:20]))) + ',' + experimental_condition + '\n')
 
         # mean reciprocal rank = harmonic mean of ranks
         mean_reciprocal_rank = np.sum(np.reciprocal([r for r in rank_counts
@@ -110,6 +112,15 @@ def script(data_path, out_path, num_diseases, **kwargs):
             f.write(','.join([experimental_condition,
                               mean_reciprocal_rank_dict[experimental_condition] + '\n']))
 
+    name = 'bin.analysis'
+    with open(os.path.join(out_path, name), 'w') as bin_file:
+        bin_file.write('one' + '\n')
+        bin_file.writelines(rank_bin_dict['one'])
+        bin_file.write('two to five' + '\n')
+        bin_file.writelines(rank_bin_dict['two to five'])
+        bin_file.write('six to twenty' + '\n')
+        bin_file.writelines(rank_bin_dict['six to twenty'])
+
 def parse_args(args):
     parser = ArgumentParser()
 
@@ -131,4 +142,4 @@ def main(args=sys.argv[1:]):
 
 
 if __name__ == '__main__':
-    cProfile.run('sys.exit(main())')
+    sys.exit(main())
