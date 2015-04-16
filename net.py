@@ -9,13 +9,16 @@ __author__ = 'Tal Friedman (talf301@gmail.com)'
 
 
 class Net:
-    def __init__(self, hpo_file, omim_file, neg_omim_file):
+    def __init__(self, hpo_file, omim_file, neg_omim_file, ic_file=None):
         """
         Construct the layers of the net and then "attach" them
         :param hpo_file: path for hp.obo file
         :param omim_file: path for phenotype_annotation.tab file
+        :param neg_omim_file: path for negative_phenotype_annotation.tab file
+        :param ic_file: path for file with information contents
         :return:
         """
+
         # Create omim and hpo stuff
         mim = MIM(omim_file)
         diseases = [d for d in mim.diseases if d.db == 'OMIM']
@@ -75,6 +78,11 @@ class Net:
         for item in self.items:
             item.fix_diseases(self.hid_dict, self.hpo)
 
+        # Load information content stuff if available
+        self.ic_dict = {}
+        if ic_file:
+            self.ic_dict = self.load_ic(ic_file)
+
     def set_query(self, terms):
         """
         Set the states of the query layer based on a list of HPO ids
@@ -132,6 +140,22 @@ class Net:
                 samples.append(annot)
             dis_scores = [(dis.disease.id,
                            dis.get_marginal_sampling_p(self.hids, 0.001, 0.1, self.interest_quer, samples, n_samples=n_samples)) for dis in self.items]
+        elif type == 'sample_ic':
+            # Generate samples first
+            samples = []
+            for i in xrange(n_samples):
+                annot = bitarray(len(self.hids))
+                annot.setall(False)
+                for hid_node in self.hids:
+                    try:
+                        if random.uniform(0,1) < p * self.ic_dict[hid_node]:
+                            annot = annot | hid_node.bitarr
+                    except KeyError:
+                        continue
+                samples.append(annot)
+            dis_scores = [(dis.disease.id,
+                           dis.get_marginal_sampling_p(self.hids, 0.001, 0.1, self.interest_quer, samples, n_samples=n_samples)) for dis in self.items]
+
 
         den = sum(d[1] for d in dis_scores)
         dis_scores = [(d[0], d[1]/den) for d in dis_scores]
@@ -139,19 +163,32 @@ class Net:
         return dis_scores
 
 
+    def load_ic(self, filename): # Return dict of HP code to info content (float)
+        ic_dict = {}
+        with open(filename) as f:
+            for line in f:
+                info = line.strip().split()
+                try:
+                    ic_dict[self.hid_dict[self.hpo['HP:' + info[0]]]] = float(info[1])
+                except KeyError:
+                    continue
+        return ic_dict
+
+
 if __name__ == '__main__':
     hp = './hp.obo'
     omim = './phenotype_annotation.tab'
     neg_omim = './negative_phenotype_annotation.tab'
     #cProfile.run('Net(hp, omim)')
-    net = Net('./hp.obo', './phenotype_annotation.tab', './negative_phenotype_annotation.tab')
+    net = Net('./hp.obo', './phenotype_annotation.tab', './negative_phenotype_annotation.tab', './ic_parent.txt')
     print "Finished!"
     print len(net.hids)
     print len(net.items)
     print len(net.quers)
+    print len(net.ic_dict.keys())
     net.set_query(open("./First_3450_356_hpo.txt", 'r').readline().split(','))
     #print(net.items[0].get_marginal_no_freq(net.hids, 0.001, 0.1))
-    type = 'sample_p'
+    type = 'sample_ic'
     cProfile.run('net.diagnose(type=type)')
     print net.diagnose(type=type)[:20]
 
