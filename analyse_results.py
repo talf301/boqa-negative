@@ -37,6 +37,14 @@ def script(data_path, out_path, num_diseases, **kwargs):
                         print 'Ignored a rank count because it exceeded the'
                         'specified rank consideration range:'
                         '\t' + experimental_condition + ':', rank
+        
+        bin_file = open(os.path.join(data_path, experimental_condition + '_bin.csv'), 'w')
+        bin_file.write(','.join(['bin', 'num']) + '\n')
+        bin_file.write(','.join(['1', str(rank_counts[1])]) + '\n')
+        bin_file.write(','.join(['5', str(sum(rank_counts[2:5]))]) + '\n')
+        bin_file.write(','.join(['20', str(sum(rank_counts[6:20]))]) + '\n')
+        bin_file.close()
+        
 
         # mean reciprocal rank = harmonic mean of ranks
         mean_reciprocal_rank = np.sum(np.reciprocal([r for r in rank_counts
