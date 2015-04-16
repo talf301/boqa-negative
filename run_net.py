@@ -9,7 +9,7 @@ from net import Net
 
 __author__ = 'Tal Friedman (talf301@gmail.com)'
 
-def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **kwargs):
+def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, ic, **kwargs):
     try:
         net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'))
     except IOError, e:
@@ -29,6 +29,8 @@ def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, **k
         net.set_query(phenos)
         if k_freqs:
             res = net.diagnose(type='k_freq', k=k_freqs)
+        elif ic:
+            res = net.diagnose(type='sample_ic',n_samples=sampling,p=p_sampling)
         elif p_sampling:
             res = net.diagnose(type='sample_p',n_samples=sampling,p=p_sampling)
         elif sampling:
@@ -75,6 +77,8 @@ def parse_args(args):
     parser.add_argument('--k_freqs', '-k', metavar='K_FREQ', type=int, default=0,
             help='Do inference by looking at the K lowest frequency annotations and'
             'expanding by expectation')
+    parser.add_argument('--ic', metavar='IC', action='store_true',
+            help='Use information content to weight sampling.')
     return parser.parse_args(args)
 
 def main(args=sys.argv[1:]):
