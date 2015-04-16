@@ -8,8 +8,14 @@
 *.pdf
 *.bbl
 *.blg
+*.dep
+*.dpth
+*.md5
+*.auxlock
 
 # Project-specific
 *.obo
 *.tab
 out/
+results/
+analysis/
