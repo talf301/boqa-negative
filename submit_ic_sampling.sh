@@ -70,7 +70,7 @@ echo "Target output director: $out" >&2
 test -s "$dir/$f"_hpo.txt
 
 # Run the actual python script
-/filer/tools/python/Python-2.7.6/python $data/run_net.py -D $data -P "$dir/$f"_hpo.txt -O \$temp -s 1000 -p 0.0002 --ic
+/filer/tools/python/Python-2.7.6/python $data/run_net.py -D $data -P "$dir/$f"_hpo.txt -O \$temp -s 1000 -p 0.002 --ic
 
 # Make sure moving finishes correctly
 mv -v \$temp/* $out

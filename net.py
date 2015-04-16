@@ -148,7 +148,7 @@ class Net:
                 annot.setall(False)
                 for hid_node in self.hids:
                     try:
-                        if random.uniform(0,1) < p * self.ic_dict[hid_node]:
+                        if random.uniform(0,1) < p / self.ic_dict[hid_node]:
                             annot = annot | hid_node.bitarr
                     except KeyError:
                         continue
