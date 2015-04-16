@@ -1,22 +1,53 @@
 \section{Models}
 \label{sec:models}
 
-In this section we describe the models resulting from various modifications to the network, in order to incorporate the desired functionality.
+In this section we describe the models resulting from various modifications to
+the network, in order to incorporate the desired functionality.
 
-\subsection*{Model 1}
+Recall that in the BOQA network, the probability of activity in a hidden node is
+realised as  
+%
+\begin{align}\label{eq:lpdhidden}
+    P \left(H_i = 1 \mid I_{\text{ea}(i)}, \bigvee H_{\text{chi}(i)}\right)
+    &= \left(
+        1 - \prod_{j=\text{ea}(i)_1}^{\text{ea}(i)_L}
+        \left(1 - I_j \, f_{ji}\right)
+    \right)
+    ^{1 - \bigvee H_{\text{chi}(i)}}
+\end{align}
+%
+where $f_{ji}$ represents the empirical frequency of the occurrence of phenotype
+$i$ with disease $j$.
+%
+Under this formulation, if disease $i$ is not annotated to phenotype $j$, 
+and none of the children of $j$ are either (i.e., $\bigvee H_{\text{chi}(i)} = 0$),
+then the probability of activity in the hidden layer is simply zero.
+%
+In other words, the likelihood of observing this symptom, given that the patient
+has disease $i$, is zero.
 
-- keep the structure of the network
+However, since the symptom is not negatively annotated to the disease, we would
+like the model instead to assign some likelihood to the occurrence of this event,
+encoding the expectation that the symptom may occur together with the disease
+by chance.
+%
+In particular, a likelihood of zero should be assigned only to those symptoms
+that are negatively annotated to the disease.
+%
+We modify the local probability distribution in (\ref{eq:lpdhidden}) to capture
+this specification as described in the following paragraphs.
 
-- only change probabilities as follows:
+Let $\text{pos}(i) = \{\text{pos}(i)_1, \hdots, \text{pos}(i)_S\}$, for each
+$H_i$, index the $S$ diseases for which $H_i$ is explicitly positively
+annotated and let $\text{neg}(i) = \{\text{neg}(i)_1, \hdots,
+\text{neg}(i)_T\}$, the $T$ diseases for which $H_i$ is explicitly negatively
+annotated.
 
-- let $\text{pos}(i) = \{\text{pos}(i)_1, \hdots, \text{pos}(i)_S\}$, for each $H_i$, index the $S$ diseases for which $H_i$ is explicitly positively annotated
-and
-let $\text{neg}(i) = \{\text{neg}(i)_1, \hdots, \text{neg}(i)_T\}$, the $T$ diseases for which $H_i$ is explicitly negatively annotated
-
-- then let 
-\begin{align*}
-    P\left(H_i = 1 \mid I_{\text{pos}(i)_1}, \hdots, I_{\text{pos}(i)_S}, \bigvee I_{\text{neg}(i)}, \bigwedge H_{\text{chi}(i)}\right)
-        = \left(
+Then if we let the probability of activity in a hidden node $H_j$ be given by
+\begin{align}\label{eq:lpdhiddenmod1}
+    &P\left(H_i = 1 \mid I_{\text{pos}(i)_1}, \hdots, I_{\text{pos}(i)_S},
+    \bigvee I_{\text{neg}(i)}, \bigwedge H_{\text{chi}(i)}\right)\nonumber\\
+        &= \left(
             1 - 
             \left(
                 \prod_{j=\text{pos}(i)_1}^{\text{pos}(i)_S}
@@ -24,16 +55,29 @@ let $\text{neg}(i) = \{\text{neg}(i)_1, \hdots, \text{neg}(i)_T\}$, the $T$ dise
             \right) ^{1 - \bigvee I_{\text{neg}(i)}}
         \right)
         ^{1 - \bigvee H_{\text{chi}(i)}}
-\end{align*}
+\end{align}
+where if the empirical frequency is not available but the symptom $j$ is not
+negatively annotated to disease $i$, then frequency $f_{ji}$ is set to some
+small value, $p$.
+%
+\footnote{It should be noted that activity of a child annotation of a node
+    $H_j$ entails activity in $H_j$ under the formulation in
+    (\ref{eq:lpdhiddenmod1}), even if phenotype $j$ is negatively annotated
+    to the disease of interest. However, this situation does not occur in the
+    HPO, and so we need not treat special cases.
+}
+%
+We consider different values of $p$ in the experimental results section.
 
-- if there is no frequency $f_{ji}$ set $f_{ji}$ to some random nonzero factor
+However, the result of this modification to the network is that exact inference
+is now intractable, since marginalising over all binary assignments to the
+hidden nodes is exponential in the number of phenotypes (i.e., there are $2^M$
+configurations to consider). Therefore, we consider several methods to
+approximate computation of the marginals.
 
-- NB: the child annotation being on overrides the negative annotation from a disease in this formulation if we admit that $0^0 = 1$ 
+\subsection{Approximate inference}
 
-\subsection*{Model 2}
+\subsection{$p$-sampling}
 
-- add another hidden layer????
+\subsection{Information-content sensitive $p$-sampling}
 
-\subsection*{Model 3}
-
-- replace everything with a convnet
