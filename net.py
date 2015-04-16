@@ -26,7 +26,6 @@ class Net:
         # Deal with loading negatives
         dis_dict = {dis.id: dis for dis in diseases}
         neg_omim = MIM(neg_omim_file)
-        print len(neg_omim.diseases)
         for dis in neg_omim:
             try:
                 dis_dict[dis.id].neg_pheno = dis.phenotype_freqs.keys()

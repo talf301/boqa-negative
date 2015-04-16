@@ -77,7 +77,7 @@ def parse_args(args):
     parser.add_argument('--k_freqs', '-k', metavar='K_FREQ', type=int, default=0,
             help='Do inference by looking at the K lowest frequency annotations and'
             'expanding by expectation')
-    parser.add_argument('--ic', metavar='IC', action='store_true',
+    parser.add_argument('--ic', action='store_true',
             help='Use information content to weight sampling.')
     return parser.parse_args(args)
 
