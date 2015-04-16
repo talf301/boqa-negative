@@ -11,7 +11,10 @@ __author__ = 'Tal Friedman (talf301@gmail.com)'
 
 def script(data_path, patient_path, out_path, p_sampling, sampling, k_freqs, ic, **kwargs):
     try:
-        net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'))
+        if ic:
+            net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'), os.path.join(data_path, 'ic_parent.txt'))
+        else:
+            net = Net(os.path.join(data_path, 'hp.obo'), os.path.join(data_path, 'phenotype_annotation.tab'), os.path.join(data_path, 'negative_phenotype_annotation.tab'))
     except IOError, e:
         logging.error(e)
         sys.exit(1)
