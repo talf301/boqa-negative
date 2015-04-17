@@ -14,4 +14,5 @@ To run nofreqs on each set of patients:
 	python run_net.py --patient_path directory_with_patients --out_path output_folder
 
 hpo.py, omim.py are adapted from github.com/buske/patient-similarity
+
 generate_patient_pairs.py is adapted from github.com/talf301/matchingsim
