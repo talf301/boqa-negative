@@ -1,7 +1,32 @@
 \section{Discussion}
 \label{sec:dis}
-
+We have made 3 modifications to the BOQA model and how inference is done with it:
+sampling, $p$-sampling, and Information Content (IC) sampling. The results show
+through most experiments and metrics that sampling provides an improvement over
+the current $k$-least frequency annotation method of inference. Additionally, it
+appears that both $p$-sampling and IC sampling perform rather poorly on artificial
+patients, but reasonably well on naturalistic patients, especially IC sampling.
+%
+Comparing $p$-sampling and IC sampling to other
+methods is tricky, as it must be noted that these both require the hyperparameter $p$ to be tuned, which we did
+not have the computational resources to do. In contrast, sampling and $k$-least 
+frequency annotation methods have no such hyperparameter, and thus can not be fine-tuned
+any further. However, there is no guarantee that fine-tuning $p$ would provide a large
+increase in performance. In this case, the size of the ontology coupled with the possibility of any phenotype becoming annotated 
+may mean that $p$ sampling to introduce too much noise into the model.
 In the present study, we have no information on correlations between diseases.
+%
+It is difficult to judge whether artificial or naturalistic results should be weighed
+more heavily, as they often appear to be very different. By nature, artificial patients
+are guaranteed to contain at least some phenotypic information which is relevant to the 
+true diagnosis. This is not necessarily true for naturalistic data, as the clinician seeing
+the patient may not spend enough time to properly enter information, and also has access
+to other information about the patient when making the correct diagnosis. 
+%
+In terms of further steps, one possibility might be to take a variational approach. This
+would allow one to consider probabilistic states for the hidden nodes rather than just sampling
+over many determinstic ones, meaning that complex modifications to the model can still be
+computationally tractable. 
 %
 In particular, our ranking evaluation metrics do not take into account the
 relative severity of ranking particular diseases above the gold-standard disease.
@@ -12,5 +37,6 @@ incurred should be lesser than if an unrelated disease were higher ranked.
 %
 A further investigation is necessary to determine whether the relative
 performance of the considered methods would change under such a cost metric.
+%
 
 
