@@ -1,44 +1,180 @@
 \section{Previous Work}
 \label{sec:lit-rev}
 
-\cite{bauer2012bayesian} introduce Bayesian inference into a query system.
-
-Their network comprises three layers of Boolean variables: an {\it item} layer
-of diseases, a {\it hidden} layer of phenotypic features, and a {\it query}
-layer of phenotypic features.
+Bauer et al.\ \cite{bauer2012bayesian} introduced a disease diagnosis system
+that uses Bayesian inference to resolve diagnostic queries, entitled the 
+{\it Bayesian Ontology Query System} (BOQA).
 %
-Each node in the query layer corresponds to exactly one node in the hidden
-layer.
-
-The causal relationship between a disease and its potential symptoms is modelled
-as a set of directed edges from a disease node in the {\it item} layer to a
-subset of the phenotypic nodes in the {\it hidden} layer.
-
-The {\it hidden} layer is then connected to the {\it query} layer in a
-one-to-one fashion by a directed edge from a phenotype node in the {\it hidden}
-layer to its correspondent in the {\it query} layer.
-
-Furthermore, there are within-layer connections to model the ontology of
-symptoms given by the Human Phenotype Ontology (HPO) \cite{kohler2014hpo}.
-
-Within the {\it hidden} layer, there is a directed edge from node $H_i$ to $H_j$
-if the annotation of the phenotype $H_i$ implies that the phenotype $H_j$ is
-also present.
-
-Such an edge is present in the network if the phenotype $H_i$ is a child of
-phenotype $H_j$ in the HPO; these edges serve the purpose of encoding the {\it
-annotation propagation rule}: if an item $j$ is annotated to term $i$ then it is
-implicitly annotated to all ancestors of $i$.
-
-In the case that the edge is present, in the {\it query} layer, there is a
-directed edge from phenotype $Q_j$ to phenotype $Q_i$ (i.e., an edge in the
-inverse direction of the edge $H_i \to H_j$).
-
-%See \Figure{fig:bauer-net}.
+The system comprises a Bayesian network with three layers of Boolean variables:
+an {\it item} layer of diseases, a {\it hidden} layer of phenotypic features,
+and a {\it query} layer of phenotypic features.
 %
-%\begin{wrapfigure}{r}{0.5\textwidth}
-%    \label{fig:bauer-net}
-%\end{wrapfigure}
+\footnote{
+    In this report, we use the term {\it phenotype} interchangeably with symptom,
+    since all symptoms of interest to the model are expected to have their root
+    in genetic disorders.
+}
+%
+The causal relationships between a disease and its related symptoms are modelled
+as a set of directed edges from each disease node in the {\it item} layer to its
+subset of phenotypic nodes in the {\it hidden} layer.
+%
+We may refer to the symptoms caused by a disease as the disease's phenotype {\it
+annotations}.
+%
+Each phenotype node in the hidden layer is paired with exactly one node in the
+query layer by a directed edge from the node in the hidden layer to its
+correspondent in the query layer.
+
+We may interpret this model in a generative fashion as follows:
+%
+the occurrence of a disease (activity in an item node) causes its symptoms to
+occur with some probability (activity in a hidden node). Furthermore, the
+presence of a symptom (activity in a hidden node) may lead to the clinician
+detecting the symptom (activity in a query node). However, the clinician may
+fail to recognise the occurrence of a symptom (activity in a hidden node without
+activity in teh corresponding query node), or the clinician could perceive a
+symptom where none exists (activity in a query node without
+activity in the corresponding hidden node).
+%
+In this way, the hidden layer allow the system to model unceratainty about the
+accuracy of a clinician's symptomatic description.
+
+In addition to the edges between layers, BOQA contains within-layer connections
+to model the ontology of phenotypes described by the Human Phenotype Ontology
+(HPO) \cite{kohler2014hpo}.
+%
+Within the hidden layer, there is a directed edge from node $H_a$ to $H_b$
+if the annotation of the phenotype $H_a$ to a disease implies that the phenotype
+$H_b$ is also annotated to the disease.
+%
+Such an edge is present in the network if the phenotype $H_a$ is a child of
+phenotype $H_b$ in the HPO. 
+%
+These edges serve the purpose of encoding the {\it annotation propagation rule}:
+if an item $i$ is annotated to term $j$ then it is implicitly annotated to all
+ancestors of $j$.
+
+Lastly, in the case that the edge from $H_a$ to $H_b$ is present, then  in the
+query layer, there is a directed edge from phenotype $Q_b$ to phenotype $Q_a$ (i.e., an edge in the
+inverse direction of the edge $H_a \to H_b$).
+%
+These edges serve to enceode
+
+See \Figure{fig:bauer-net}.
+%
+\begin{figure}[h]
+\newcommand{\itemlayer}{$I_1$/A, $I_2$/B}
+\newcommand{\hiddenquerylayers}{$H_1$/C/$Q_1$/J, $H_2$/D/$Q_2$/K, $H_3$/E/$Q_3$/L, $H_4$/F/$Q_4$/M, $H_5$/G/$Q_5$/N, $H_6$/H/$Q_6$/O, $H_7$/I/$Q_7$/P}
+%
+    \label{fig:bauer-net}
+    \begin{tikzpicture}
+        \pgfmathsetmacro\diametersqr{1}
+        \pgfmathsetmacro\rectwidth{2}
+        \pgfmathsetmacro\rectheight{8}
+        \pgfmathsetmacro\spacing{1}
+        
+        \pgfmathsetmacro\numnodesitem{2}
+        \pgfmathsetmacro\numnodeshiddenquery{7}
+        
+        % item layer
+        \xdef\xlist{4}
+        \xdef\ylist{4}
+        \pgfmathsetmacro\yoffset{\rectheight / \numnodesitem}
+        \foreach \m/\n [count=\l] in \itemlayer{
+            \foreach \k in {1,...,400}{ % try 400 times to place without a collision
+                \pgfmathsetmacro\x{rnd*\rectwidth}
+                \pgfmathsetmacro\y{(\l - 1)*\yoffset + rnd*\yoffset}
+                \xdef\collision{0}
+                \foreach \element [count=\i] in \xlist{
+                    \pgfmathtruncatemacro\j{\i-1}
+                    \pgfmathsetmacro\checkdistancesqr{ ( ({\xlist}[\j]-(\x))^2 + ({\ylist}[\j]-(\y))^2 ) }
+                    \ifdim\checkdistancesqr pt<\diametersqr pt
+                        \xdef\collision{1}
+                        \breakforeach
+                    \fi
+                }
+                \ifnum\collision=0
+                    \xdef\xlist{\xlist,\x}
+                    \xdef\ylist{\ylist,\y}
+                    \draw (\x,\y) node[item on] (\n) {\m};
+                    \breakforeach
+                \fi 
+            }
+        }
+        
+        % hidden layer
+        \xdef\xlist{4}
+        \xdef\ylist{4}
+        \pgfmathsetmacro\yoffset{\rectheight / \numnodeshiddenquery}
+        \foreach \m/\n/\o/\p [count=\l] in \hiddenquerylayers{
+            \foreach \k in {1,...,400}{ % try 400 times to place without a collision
+                \pgfmathsetmacro\x{((-1)^\l)*rnd*\rectwidth + 2*\rectwidth + \spacing}
+                \pgfmathsetmacro\y{(\l - 1)*\yoffset + rnd*\yoffset}
+                \xdef\collision{0}
+                \foreach \element [count=\i] in \xlist{
+                    \pgfmathtruncatemacro\j{\i-1}
+                    \pgfmathsetmacro\checkdistancesqr{ ( ({\xlist}[\j]-(\x))^2 + ({\ylist}[\j]-(\y))^2 ) }
+                    \ifdim\checkdistancesqr pt<\diametersqr pt
+                        \xdef\collision{1}
+                        \breakforeach
+                    \fi
+                }
+                \ifnum\collision=0
+                    \xdef\xlist{\xlist,\x}
+                    \xdef\ylist{\ylist,\y}
+                    \draw (\x,\y) node[hidden on] (\n) {\m};
+                
+                    \pgfmathsetmacro\x{\x + 2*\rectwidth + \spacing}
+                    \draw (\x,\y) node[query on] (\p) {\o};
+                    
+                    \breakforeach
+                \fi 
+            }
+        }
+        
+        % edges from item to hidden layer
+        \edge {A} {C,F};
+        \edge {B} {H};
+        
+        % edges from hidden to query layer
+        \edge {C} {J};
+        \edge {D} {K};
+        \edge {E} {L};
+        \edge {F} {M};
+        \edge {G} {N};
+        \edge {H} {O};
+        \edge {I} {P};
+        
+        % edges within hidden layer
+        \edge {C} {E};
+        \edge {D} {E};
+        \edge {E} {F};
+        \edge {F} {G};
+        \edge {G} {I};
+        \edge {H} {I};
+        
+        % edges within query layer
+        \edge {L} {J};
+        \edge {L} {K};
+        \edge {M} {L};
+        \edge {N} {M};
+        \edge {P} {N};
+        \edge {P} {O};
+        
+        % surrounding boxes
+        \node (X) [draw=blue, fit= (A) (B), inner sep=0.2cm, ultra thick, fill=blue!20, fill opacity=0.2] {};
+        \node [yshift=2.0ex] at (X.north) {\textbf{item layer}};
+        
+        \node (Y) [draw=orange, fit= (C) (D) (E) (F) (G) (H) (I), inner sep=0.2cm, ultra thick, fill=orange!20, fill opacity=0.2] {};
+        \node [yshift=2.0ex] at (Y.north) {\textbf{hidden layer}};
+        
+        \node (Z) [draw=purple, fit= (J) (K) (L) (M) (N) (O) (P), inner sep=0.2cm, ultra thick, fill=purple!20, fill opacity=0.2] {};
+        \node [yshift=2.0ex] at (Z.north) {\textbf{query layer}};
+    \end{tikzpicture}
+    \caption{BOQA network structure.\footnotemark}
+\end{figure}
+\footnotetext{Reproduced from \bibentry{bauer2012bayesian}.}
 
 \subsection{Network construction}
 
