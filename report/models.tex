@@ -1,8 +1,18 @@
-\section{Models}
+\section{Modifications}
 \label{sec:models}
 
-In this section we describe the models resulting from various modifications to
-the network, in order to incorporate the desired functionality.
+In this section we describe the various modifications to
+the network structure and inference procedure made in order to incorporate the
+desired functionality.
+\footnote{
+    Our code can be found at
+    \url{https://github.com/talf301/boqa-negative}.
+    We reimplemented the BOQA baseline codebase in Python, and manually coded all
+    modifications described in this section.
+}
+
+\subsection{Modification to the network structure}
+\label{subsec:modnetstruct}
 
 Recall that in the BOQA network, the probability of activity in a hidden node is
 realised as  
@@ -23,7 +33,7 @@ Under this formulation, if disease $i$ is not annotated to phenotype $j$,
 and none of the children of $j$ are either (i.e., $\bigvee H_{\text{chi}(i)} = 0$),
 then the probability of activity in the hidden layer is simply zero.
 %
-In other words, the likelihood of observing this symptom, given that the patient
+In other words, the likelihood of observing symptom $j$, given that the patient
 has disease $i$, is zero.
 
 However, since the symptom is not negatively annotated to the disease, we would
@@ -32,7 +42,7 @@ encoding the expectation that the symptom may occur together with the disease
 by chance.
 %
 In particular, a likelihood of zero should be assigned only to those symptoms
-that are negatively annotated to the disease.
+that are negatively annotated to a disease.
 %
 We modify the local probability distribution in (\ref{eq:lpdhidden}) to capture
 this specification as described in the following paragraphs.
@@ -66,39 +76,48 @@ small value, $p$.
     to the disease of interest. However, this situation does not occur in the
     HPO, and so we need not treat special cases.
 }
-%
 
 However, the result of this modification to the network is that exact inference
 is now intractable, since marginalising over all binary assignments to the
-hidden nodes is exponential in the number of phenotypes (i.e., there are $2^M$
-configurations to consider). Therefore, we consider several methods to
-approximate computation of the marginals.
+hidden nodes is exponential in the number of phenotypes,
+as noted in \Section{subsubsec:kleast}. 
+%
+Furthermore, we may not apply the $k$-least frequencies restriction 
+described in \Section{subsubsec:kleast}. 
+to simplify the marginalisation, since that would force some hidden nodes to
+deterministically be inactive, conditional on activity in
+some item node, even though the corresponding phenotypes  may not be negatively
+annotated to the active disease.
+%
+Therefore, we consider several methods to approximate computation of the
+marginals, which we describe in the next sections.
 
-\subsection{Sampling}
-In the original model, rather than using the method of \Section{subsubsec:kleast}, we
-apply a monte carlo approach. For each item node, we independently sample each edge
-which has frequency information, creating n=1000 models. We then compute the marginals
-over each of these models, and take an average to get our final marginals. This process
-of sampling edges based on frequencies is equivalent to probabilistically determining
-the activity of the hidden layer based on frequency information.
-\subsection{$p$-sampling}
-Since our modification to the model makes exact inference intractable, we again apply
-a monte carlo approach. In this model, we apply the same sampling for edges with frequency
-information, but additionally we assume that there is an edge to each hidden node without
-a negative annotation, with frequency $p$. For computational reasons, we precompute the
-same sample of edges with probability $p$ for all item nodes, and then apply necessary per-node
-transformations.
-\subsection{Information-content sensitive $p$-sampling}
-Rather than using a single value $p$ as the probability for any edge to exist, we weight these
-probabilities inversely based on the information content of the phenotype associated with the hidden node. 
-Equation (\ref{eq:infocontent}) describes how we compute the information content for each phenotype.
-\begin{align}\label{eq:infocontent}
-	-\log_{2}\frac{\text{\# of annotations for disease} i \text{including descendants}}{N}
+\subsection{Modifications to the inference procedure}
+\label{subsec:modinf}
+
+We test two different methods of sampling to approximate inference in the
+network.
+
+\subsubsection{$p$-sampling}
+\label{subsubsec:psampmodel}
+%
+As described for \Equation{eq:lpdhiddenmod1}, we
+we assume that for each hidden node without a negative annotation, the frequency
+has a fixed value of $p$. 
+%
+More details are given in \Section{subsubsec:psampexp}.
+
+\subsubsection{Information-content sensitive $p$-sampling}
+%
+Here, Rather than using a single value $p$ as frequency, we weight these
+probabilities by the inverse information content of the phenotype
+associated with the hidden node. \Equation{eq:infocontent} shows how
+we compute the information content for each phenotype.
+%
+\begin{align}\label{eq:infocontent} 
+    -\log_{2}\frac{\text{\# of annotations for disease } i \text{ including
+    descendants}}{N},
 \end{align}
-
-
-
-\footnote{Link to repo:
-    \url{https://github.com/talf301/boqa-negative}
-}
-
+where $N$ is the number of known diseases.
+%
+More details are given in \Section{subsubsec:icpsampexp}.
