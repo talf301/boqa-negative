@@ -67,7 +67,6 @@ small value, $p$.
     HPO, and so we need not treat special cases.
 }
 %
-We consider different values of $p$ in the experimental results section.
 
 However, the result of this modification to the network is that exact inference
 is now intractable, since marginalising over all binary assignments to the
@@ -75,11 +74,28 @@ hidden nodes is exponential in the number of phenotypes (i.e., there are $2^M$
 configurations to consider). Therefore, we consider several methods to
 approximate computation of the marginals.
 
-\subsection{Approximate inference}
-
+\subsection{Sampling}
+In the original model, rather than using the method of \Section{subsubsec:kleast}, we
+apply a monte carlo approach. For each item node, we independently sample each edge
+which has frequency information, creating n=1000 models. We then compute the marginals
+over each of these models, and take an average to get our final marginals. This process
+of sampling edges based on frequencies is equivalent to probabilistically determining
+the activity of the hidden layer based on frequency information.
 \subsection{$p$-sampling}
-
+Since our modification to the model makes exact inference intractable, we again apply
+a monte carlo approach. In this model, we apply the same sampling for edges with frequency
+information, but additionally we assume that there is an edge to each hidden node without
+a negative annotation, with frequency $p$. For computational reasons, we precompute the
+same sample of edges with probability $p$ for all item nodes, and then apply necessary per-node
+transformations.
 \subsection{Information-content sensitive $p$-sampling}
+Rather than using a single value $p$ as the probability for any edge to exist, we weight these
+probabilities inversely based on the information content of the phenotype associated with the hidden node. 
+Equation (\ref{eq:infocontent}) describes how we compute the information content for each phenotype.
+\begin{align}\label{eq:infocontent}
+	-\log_{2}\frac{\text{\# of annotations for disease} i \text{including descendants}}{N}
+\end{align}
+
 
 
 \footnote{Link to repo:
