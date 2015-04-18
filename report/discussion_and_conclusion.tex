@@ -1,0 +1,63 @@
+\section{Discussion \& conclusion}
+\label{sec:dis}
+%
+We have made three modifications to the structure of the BOQA model and how inference is done with it:
+sampling, $p$-sampling, and Information Content (IC) sampling. The results show,
+through most experiments and metrics, that sampling provides an improvement over
+the current $k$-least frequency annotation method. Additionally, it
+appears that both $p$-sampling and IC-sampling perform rather poorly on artificial
+patients, but reasonably well on naturalistic patients, especially IC-sampling.
+
+Comparing $p$-sampling and IC-sampling to other
+methods is tricky, as it must be noted that the former two both require the hyperparameter $p$ to be tuned, which we did
+not have the computational resources to do. In contrast, sampling and $k$-least 
+frequency annotation methods have no such hyperparameter, and thus cannot be fine-tuned
+any further. While this may leave room for improvement, 
+there is no guarantee that fine-tuning $p$ would provide a large
+increase in performance to the models. In this case of this domain problem, the size of the ontology coupled with 
+the possibility of any number of phenotypes being annotated 
+to a disease may mean that $p$-sampling, and hence IC-sampling, introduces too much noise into the model
+to be an effective method.
+
+As for our data,
+it is difficult to judge whether artificial or naturalistic results should be weighed
+more heavily, as they often appear to be very different. By nature, artificial patients
+are guaranteed to contain at least some phenotypic information that is relevant to the 
+true diagnosis. This is not necessarily true for naturalistic data, as the clinician seeing
+the patient may not spend enough time to properly enter information, and also has access
+to other information about the patient when making the correct diagnosis, meaning that the clinician's
+phenotypic description may be incomplete.
+
+In addition, the available naturalistic data had only a small proportion of diseases with negative annotations.
+%
+Therefore, in this report we were unable to investigate whether the change in performance among
+models, between the general diseases and the negatively-annotated diseases, would occur similarly for
+the naturalistic patient data.
+%
+This, in conjunction with the fact that the results differed to a great extent between the 
+artificial and naturalistic patient dataset, implies we cannot make a strong prediction either way;
+therefore, explicit testing of the models on  naturalistic patient cases with negatively annotated data
+is necessary in another study.
+%
+Furthermore, such data would also enable us to evaluate our test data generation procedure, for if the 
+performance did not differ in a similar manner to the difference in performance for the artificial patient
+data, then the quality of our artificially generated data would come into question.
+
+In terms of evaluation metrics, presently ours do not take into account the
+relative severity of ranking particular diseases above the gold-standard disease.
+%
+However, in reality it may be the case that the model ranks a close variant
+above the gold-standard disease, in which case the misclassification cost
+incurred should be lesser than if an unrelated disease were higher ranked.
+%
+A further investigation is necessary to determine whether the relative
+performance of the considered methods would change under a cost metric
+that takes this into account.
+
+In conclusion, it is difficult to be certain of the performance of the methods we have introduced. There is the potential to improve them via tuning of hyper parameters, or by tuning more quickly, and perhaps precisely, using a method other than sampling. Additionally, a more thorough investigation of different $\alpha$ and $\beta$ values could be performed: for computational reasons we only used fixed values of $\alpha=0.001,\ \beta=0.1$ throughout this report. It is a possibility that using different values or integrating over a distribution for these values will improve results. 
+
+As for further steps, one possibility is to take a variational approach. This
+would allow one to consider probabilistic states for the hidden nodes rather than just sampling
+over many deterministic ones, meaning that complex modifications to the model would still be
+computationally tractable. 
+

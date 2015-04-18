@@ -5,27 +5,37 @@
 \usepackage{bibentry}
 \usepackage{caption}
 \usepackage{filecontents}
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{natbib}
 \usepackage{pgfplots}
+\usepackage{subcaption}
 \usepackage{tikz}
 \usetikzlibrary{bayesnet}
 \usepackage{wrapfig}
 \usepackage{xstring}
 \usepackage{url}
 
+
 \usepackage{nips14submit_e}
 \usepackage{times}
 
 
-\title{Title}
+\title{
+ Incorporating negative evidence into disease diagnosis:
+ What you know can't hurt you
+}
 
 \author{
-Tal Friedman \\
+Tal Friedman $\mid$
+0 999 875 899
+\\
 \texttt{talf301@gmail.com} \\
 \And
-Erin Grant \\
+Erin Grant $\mid$
+0 998 983 961
+\\
 \texttt{erin.grant@mail.utoronto.ca}
 }
 
@@ -83,7 +93,7 @@ Erin Grant \\
 {}
 
 
-%\nipsfinalcopy % Uncomment for camera-ready version
+\nipsfinalcopy % Uncomment for camera-ready version
 
 
 \begin{document}
@@ -93,21 +103,13 @@ Erin Grant \\
 \maketitle
 
 
-\begin{abstract}
-
-    Blah blah blah.
-
-\end{abstract}
-
-
 \input{intro}
 \input{literature_review}
 \input{objectives}
 \input{models}
 \input{experiments}
 \input{results}
-\input{discussion}
-\input{conclusion}
+\input{discussion_and_conclusion}
 
 \bibliographystyle{plain}
 \bibliography{project}

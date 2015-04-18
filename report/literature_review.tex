@@ -3,7 +3,7 @@
 
 Bauer et al.\ \cite{bauer2012bayesian} introduced a disease diagnosis system
 that uses Bayesian inference to resolve diagnostic queries, entitled the 
-{\it Bayesian Ontology Query System} (BOQA).
+{\it Bayesian Ontology Query Algorithm} (BOQA).
 %
 The system comprises a Bayesian network with three layers of Boolean variables:
 an {\it item} layer of diseases, a {\it hidden} layer of phenotypic features,
@@ -19,11 +19,11 @@ The causal relationships between a disease and its related symptoms are modelled
 as a set of directed edges from each disease node in the {\it item} layer to its
 subset of phenotypic nodes in the {\it hidden} layer.
 %
-We may refer to the symptoms caused by a disease as the disease's phenotype {\it
+We may refer to the symptoms caused by a disease as the disease's {\it phenotype
 annotations}.
 %
 Each phenotype node in the hidden layer is paired with exactly one node in the
-query layer by a directed edge from the node in the hidden layer to its
+query layer, by a directed edge from the node in the hidden layer to its
 correspondent in the query layer.
 
 We may interpret this model in a generative fashion as follows:
@@ -33,11 +33,11 @@ occur with some probability (activity in a hidden node). Furthermore, the
 presence of a symptom (activity in a hidden node) may lead to the clinician
 detecting the symptom (activity in a query node). However, the clinician may
 fail to recognise the occurrence of a symptom (activity in a hidden node without
-activity in teh corresponding query node), or the clinician could perceive a
+activity in the corresponding query node), or the clinician could perceive a
 symptom where none exists (activity in a query node without
 activity in the corresponding hidden node).
 %
-In this way, the hidden layer allow the system to model unceratainty about the
+In this way, the hidden layer allows the system to model uncertainty about the
 accuracy of a clinician's symptomatic description.
 
 In addition to the edges between layers, BOQA contains within-layer connections
@@ -59,10 +59,9 @@ Lastly, in the case that the edge from $H_a$ to $H_b$ is present, then  in the
 query layer, there is a directed edge from phenotype $Q_b$ to phenotype $Q_a$ (i.e., an edge in the
 inverse direction of the edge $H_a \to H_b$).
 %
-These edges serve to enceode
-
-See \Figure{fig:bauer-net}.
+These edges serve to encode the fact that a if a phenotype $Q_a$ is in the search query, then so are all of its ancestors.
 %
+\begin{center}
 \begin{figure}[h]
 \newcommand{\itemlayer}{$I_1$/A, $I_2$/B}
 \newcommand{\hiddenquerylayers}{$H_1$/C/$Q_1$/J, $H_2$/D/$Q_2$/K, $H_3$/E/$Q_3$/L, $H_4$/F/$Q_4$/M, $H_5$/G/$Q_5$/N, $H_6$/H/$Q_6$/O, $H_7$/I/$Q_7$/P}
@@ -174,13 +173,16 @@ See \Figure{fig:bauer-net}.
     \end{tikzpicture}
     \caption{BOQA network structure.\footnotemark}
 \end{figure}
+\end{center}
 \footnotetext{Reproduced from \bibentry{bauer2012bayesian}.}
 
-\subsection{Network construction}
+\subsection{Network construction\footnotemark}
+\label{subsec:netconst}
+\footnotetext{Equations in \Section{subsec:netconst} are reproduced from \bibentry{bauer2012bayesian}.}
 
 Let $M$ represent the number of terms in the ontology, and let $N$ represent the
 number of diseases.
-
+%
 Let 
 $\{I_i\}_{i=1}^{N}, 
 \{H_j\}_{j=1}^{M}$ and 
@@ -192,12 +194,12 @@ the HPO;
 %
 i.e., $H_i$ and $Q_i$ together correspond to the $i$th node in the ontology.
 %
-Identify parent-child relations from the ontology in the following manner:
+We identify parent-child relations from the ontology in the following manner:
 %
 let pa$(i) = \{\text{pa}(i)_1, \hdots, \text{pa}(i)_J\}$ denote the $J$ indices
 of the direct parents of term $i$ in the ontology, 
 %
-and similarly let chi$(i) = \{\text{chi}(i)_1, \hdots, \text{chi}(i)_K\}$ to
+and similarly let chi$(i) = \{\text{chi}(i)_1, \hdots, \text{chi}(i)_K\}$ 
 denote the $K$ indices of the direct children of term $i$ in the ontology.
 
 Furthermore, indices of disease nodes in the network correspond to indices of
@@ -222,13 +224,13 @@ The local probability distributions for the hidden nodes can then be written as
 where $\bigvee$ represents the logical disjunction, and $f_{ji}$ represents the
 empirical frequency of the occurrence of phenotype $i$ with disease $j$.
 %
-This formulation captures the annotation propagation rule within the hidden,
+This formulation captures the annotation propagation rule within the hidden layer,
 since it evaluates to $1$ if $\bigvee H_{\text{chi}(i)} = 1$; that is, if any
 child annotations are active.
 %
 As well, it captures that the hidden node is inactive with probability 1 if all
 diseases are inactive (i.e., $I_i = 0, \forall i$), and otherwise the
-probabillity of activity in the hidden state is a function of the emprical
+probability of activity in the hidden state is a function of the empirical
 association of disease and symptom.
 
 The local probability distribution for the query nodes, given the states of
@@ -302,9 +304,9 @@ I_N$ in the item layer, given some phenotypic evidence $Q_1, \hdots, Q_M$, is
 given by marginalising over $\vec{H}$ as
 %
 \begin{align*}
-    P(I_1, \hdots, I_n \mid Q_1, \hdots, Q_M)
-    &= \frac{\sum_{\vec{H}} P(I_1, \hdots, I_n, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q)} \\
-    &= \frac{\sum_{\vec{H} \in \{0, 1\}^M} P(I_1, \hdots, I_n, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q)} \\
+    P(I_1, \hdots, I_N \mid Q_1, \hdots, Q_M)
+    &= \frac{\sum_{\vec{H}} P(I_1, \hdots, I_N, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q_1, \hdots, Q_M)} \\
+    &= \frac{\sum_{\vec{H} \in \{0, 1\}^M} P(I_1, \hdots, I_N, H_1, \hdots, H_M, Q_1, \hdots, Q_M)}{P(Q_1, \hdots, Q_M)} \\
 \end{align*}
 
 The goal of this model is to find the configuration of diseases with highest
@@ -317,7 +319,7 @@ of the likelihood and the prior; i.e., the solution is given by
     &\argmax_{(I_1, \hdots, I_N)} \;
     P(I_1, \hdots, I_N \mid Q_1, \hdots, Q_M) \nonumber\\
     &= \argmax_{(I_1, \hdots, I_N)} \;
-    \frac{P(Q_1, \hdots, Q_M \mid I_1, \hdots, I_N )\; P(I_1, \hdots, I_N)}{P(Q)} \nonumber\\
+    \frac{P(Q_1, \hdots, Q_M \mid I_1, \hdots, I_N )\; P(I_1, \hdots, I_N)}{P(Q_1, \hdots, Q_M)} \nonumber\\
     &= \argmax_{(I_1, \hdots, I_N)} \;
     P(Q_1, \hdots, Q_M \mid I_1, \hdots, I_N )\; P(I_1, \hdots, I_N) \nonumber\\
     &= \argmax_{(I_1, \hdots, I_N)} \;
@@ -348,7 +350,7 @@ impose the constraint
 %
 \Equation{eq:onehot} enforces the restriction that only one disease node may be
 active given any query, and so the maximum is taken over $N$ one-hot
-configurations for the MAP estimate.
+configurations, in order to compute the MAP estimate.
 %
 This is equivalent to assuming that a patient can have only a single disease;
 %
@@ -366,7 +368,7 @@ Bauer et al.\ simplify the local probability distribution of each hidden node
 that is given by \Equation{eq:lpdhids}.
 %
 In particular, they restrict the number of frequency annotations $f_{ji}$, for
-each disease node $I$, that are not exactly zero or exactly one, to the
+each disease node $I_i$, that are not exactly zero or exactly one, to the
 annotations with the $k$ least frequency values.
 %
 \footnote{
@@ -375,15 +377,14 @@ annotations with the $k$ least frequency values.
 %
 This has the effect of enforcing all other hidden node likelihoods
 to be either active or inactive with probability one,
-conditional on a disease node $I$.
+conditional on a disease node.
 %
 Therefore, to compute the sum over in $\vec{H} \in \{0, 1\}^M$ in
 \Equation{eq:mapinf}, the model need only take into account the subset of
 summands representing configurations in which the likelihood of all hidden nodes
-with deterministic activity is one, since the remaining terms are zero.
+with deterministic activity, is one, since the remaining terms are zero.
 %
-This makes the marginalisation computationally tractable by restricting the
-magnitude of the marginalisation.
+This makes the marginalisation computationally tractable.
 %
 In \Section{sec:models}, we describe models that either adopt or relax this
 constraint.

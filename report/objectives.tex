@@ -3,52 +3,48 @@
 
 The main contribution of this report is to incorporate the negative phenotype
 annotations given by OMIM \cite{hamosh2005online} into
-\citeauthor{kohler2014hpo}'s BOQA network.
+Bauer et al.'s \cite{bauer2012bayesian} BOQA network.
 By doing this, we wish to improve classification accuracy for diseases that
 have negative annotations, while not diminishing performance for cases in which
 the disease is only positively annotated.
 As well, we require that the complexity we add to the model does not cause the
 runtime of the algorithm to become intractable.
-
-We evaluate the augmented model by
-precision/recall and receiver operating characteristic (ROC) curves,
-as well as mean reciprocal rank.
-
-WE MAY TAKE THE FOLLOWING OUT IF NO TIME
-
+%
 Also, since the structure of the network is such that the local conditional
-probability distributions are directly interpretable, we make and test
-conjectures about the posterior probabilities of each disease. 
-The following paragraphs summarise our predictions.
+probability distributions are directly interpretable, we can make interpretable
+requirements about the posterior probabilities of each disease. 
+The following paragraphs summarise the requirements.
 
 Consider two diseases, $I_1$ and $I_2$, that have identical phenotype
-annotations, except a single symptom $Q$ that is negatively annotated to $I_1$.
+annotations, except a single symptom $Q_1$ that is negatively annotated to $I_1$.
 In order for the system to make the best diagnosis, if a patient exhibits all
-symptoms annotated to both diseases, yet does not exhibit phenotype $Q$, we
+symptoms annotated to both diseases, yet does not exhibit phenotype $Q_1$, we
 require that the system assign higher posterior probability to $I_1$.
 Furthermore, we need the system to assign higher posterior probability to $I_2$
-if the patient displays phenotype $Q$.
+if the patient displays phenotype $Q_1$.
 
-Now, consider a single disease $I$ and two patients who share the same symptoms
-except for a phenotype, $Q$, for which $I$ is negatively annotated. We require that
+Now, consider a single disease $I_1$ and two patients who share the same symptoms
+except for a phenotype, $Q_1$, for which $I_1$ is negatively annotated. We require that
 the system assign higher posterior probability to the patient who does not
-exhibit phenotype $Q$.
-
-% finish writing; there are six cases
+exhibit phenotype $Q_1$.
 
 Formally:
-
+%
 Let $(Q_1, ..., Q_M)$ be query variables.
-Let $I_1$ be a disease that is explicitly negatively annotated to $Q_1$.
-Let $I_2$ be a disease that is not explicitly annotated to $Q_1$.
-Let $I_3$ be a disease that is explicitly annotated to $Q_1$.
+Furthermore,
+let $I_1$ be a disease that is explicitly negatively annotated to $Q_1$, and
+let $I_2$ be a disease that is explicitly positively annotated to $Q_1$.
 
+Then, we require that the following relationships hold:
+
+\vspace{0.1cm}
 \begin{align*}
-    P(Q_1 = 0, \hdots, Q_M \mid I_1) \\
-    P(Q_1 = 1, \hdots, Q_M \mid I_3) \\
-    P(Q_1 = 0, \hdots, Q_M \mid I_2) \\
-    P(Q_1 = 1, \hdots, Q_M \mid I_2) \\
-    P(Q_1 = 0, \hdots, Q_M \mid I_3) \\
-    P(Q_1 = 1, \hdots, Q_M \mid I_1) 
+    P(I_1 \mid Q_1 = 0, \hdots, Q_M) >
+    P(I_2 \mid Q_1 = 0, \hdots, Q_M); \\\\
+    P(I_1 \mid Q_1 = 0, \hdots, Q_M) >
+    P(I_1 \mid Q_1 = 1, \hdots, Q_M).
 \end{align*}
+\vspace{0.1cm}
+
+In \Section{sec:models}, we formulate our model so as to satisfy these requirements.
 

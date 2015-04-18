@@ -18,9 +18,9 @@ for testing.
     examples, so we have to generate more test data to fill the void.
 }
 %
-We spawned 500 patients infected with diseases that
+We spawned 100 patients infected with diseases that
 possess positive annotations but not necessarily negative annotations, and then
-generated a further 471 patients each infected with a unique
+generated a further 100 patients each infected with a
 negatively-annotated disease.
 
 We generated and infected patients in the following manner:
@@ -29,7 +29,7 @@ We generated and infected patients in the following manner:
     \item \label{enum:patgen1}
         For a given disease, we sampled each of the disease's annotated
         symptoms with probability equal to the empirical association of symptom
-        and disease, as specified by the HPO.
+        and disease, as specified by the HPO annotations.
     \item \label{enum:patgen2}
         To simulate noise in the patient queries, we added a number
         of unrelated symptoms to the patient query by sampling with uniform
@@ -66,16 +66,15 @@ encounters, which we refer to as the {\it naturalistic patient data}.
 
 \subsection{Models to test}
 %
-In order to test our modification as outlined in \Section{subsec:modnetstruct},
-we perform experiments on various models which differ in their strcuture and
+In order to test our modifications as outlined in \Section{subsec:modnetstruct},
+we performed experiments on various models which differ in their structure and
 inference methods.
 %
 \Section{subsubsec:nofreqmodel} and 
 \Section{subsubsec:kleastmodel} describe our benchmark, and
 \Section{subsubsec:sampmodel}, 
 \Section{subsubsec:psampexp} and 
-\Section{subsubsec:icpsampexp} describe the models modified for the purposes
-of this report.
+\Section{subsubsec:icpsampexp} describe the models introduced by this report.
 
 \subsubsection{No frequency annotations model}
 \label{subsubsec:nofreqmodel}
@@ -94,7 +93,7 @@ We use this model to benchmark our results.
 \label{subsubsec:kleastmodel}
 %
 This model is identical to the final model of Bauer et al.\
-\cite{bauer2012bayesian}; specifically, the number of non-deterministic activity
+\cite{bauer2012bayesian}. Specifically, the number of non-deterministic activity
 state propagations from the item layer to the hidden layer is capped at $k$ for
 each item node, and exact inference is performed.
 %
@@ -104,15 +103,15 @@ We use this model as well to benchmark our results.
 \label{subsubsec:sampmodel}
 %
 We take the model of Bauer et al.\ \cite{bauer2012bayesian} with all frequency
-annotations; however, we do not perform exact inferernce.
+annotations; however, we do not perform exact inference.
 %
 Instead, for each item node, we independently sample each edge that has frequency
-information, with probabibility equal to the frequency, creating $n$\footnote{
-    For $p$-sampling experimental results, we chose $n=1000$.
+information, with probability equal to the frequency, creating $n$\footnote{
+    For $p$-sampling and information-content sensitive $p$-sampling, we chose $n=1000$.
 } instances of the network.
 %
 We then compute the item node marginals for each of these models, and take
-the average as the value of the posterior probabilty of each diseaes. 
+the average as the value of the posterior probability of each disease. 
 
 This process of sampling edges based on frequencies is equivalent to
 fixing the stochastic activity of the hidden layer based on
@@ -128,9 +127,10 @@ marginals, accomplished by sampling.
 \subsubsection{$p$-sampling model with negative annotations}
 \label{subsubsec:psampexp}
 %
-This model is the BOQA model, with the modified hidden layer local probablilty
-distribution described in \Equation{eq:lpdhiddenmod1}, and the sampling
-procedure described in \Section{subsubsec:psampmodel}.
+This model is the BOQA model, with the modified hidden layer local probability
+distribution described in \Equation{eq:lpdhiddenmod1}, and the specification for the
+sampling procedure described in \Section{subsubsec:psampmodel},
+with the sampling itself being done as described in \Section{subsubsec:sampmodel}.
 %
 It therefore utilises negative annotations.
 
@@ -138,8 +138,9 @@ It therefore utilises negative annotations.
 annotations}
 \label{subsubsec:icpsampexp}
 %
-Again, this is the BOQA model with the modified hidden layer local probablilty
-distribution described in \Equation{eq:lpdhiddenmod1}. The sampling
-procedure used is that described in \Section{subsubsec:icpsampexp}.
+Again, this is the BOQA model with the modified hidden layer local probabililty
+distribution described in \Equation{eq:lpdhiddenmod1}. The specification for the sampling
+procedure used is that described in \Section{subsubsec:icsampmodel},
+with the sampling itself being done as described in \Section{subsubsec:sampmodel}.
 %
 It also therefore utilises negative annotations.
