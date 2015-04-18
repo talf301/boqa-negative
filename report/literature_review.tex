@@ -32,7 +32,7 @@ the occurrence of a disease (activity in an item node) causes its symptoms to
 occur with some probability (activity in a hidden node). Furthermore, the
 presence of a symptom (activity in a hidden node) may lead to the clinician
 detecting the symptom (activity in a query node). However, the clinician may
-fail to recognise the occurrence of a symptom (activity in a hidden node without
+fail to recognize the occurrence of a symptom (activity in a hidden node without
 activity in the corresponding query node), or the clinician could perceive a
 symptom where none exists (activity in a query node without
 activity in the corresponding hidden node).
@@ -288,7 +288,7 @@ $m_{100\mid QH}$ occur with probability zero,
 and using the simplification that the configurations $m_{010\mid QH}$ and
 $m_{000\mid QH}$ have probability one.
 
-The joint probability distribution over the network is then realised as
+The joint probability distribution over the network is then realized as
 %
 \begin{align}
     &P(I_1, \hdots, I_N, H_1, \hdots, H_M, Q_1, \hdots, Q_M) \nonumber\\
@@ -301,7 +301,7 @@ The joint probability distribution over the network is then realised as
 
 The marginal probability of a configuration of the disease nodes $I_1, \hdots,
 I_N$ in the item layer, given some phenotypic evidence $Q_1, \hdots, Q_M$, is
-given by marginalising over $\vec{H}$ as
+given by marginalizing over $\vec{H}$ as
 %
 \begin{align*}
     P(I_1, \hdots, I_N \mid Q_1, \hdots, Q_M)
@@ -312,7 +312,7 @@ given by marginalising over $\vec{H}$ as
 The goal of this model is to find the configuration of diseases with highest
 posterior probability, given some phenotypic evidence.
 %
-This is a MAP inference problem, and so may be solved by maximising the product
+This is a MAP inference problem, and so may be solved by maximizing the product
 of the likelihood and the prior; i.e., the solution is given by
 %
 \begin{align}
@@ -331,9 +331,9 @@ of the likelihood and the prior; i.e., the solution is given by
 \subsection{Complexity restrictions}
 
 The computation in \Equation{eq:mapinf} is intractable, since 
-there are $2^N$ configurations of the item nodes over which to maximise the
+there are $2^N$ configurations of the item nodes over which to maximize the
 posterior, and there are $2^M$ configurations of the hidden nodes $H_1, \hdots,
-H_M$ over which to marginalise.
+H_M$ over which to marginalize.
 %
 Bauer et al.\ make two simplifications to make inference tractable; we describe
 them in \Section{subsubsec:odc} and \Section{subsubsec:kleast}.
@@ -341,7 +341,7 @@ them in \Section{subsubsec:odc} and \Section{subsubsec:kleast}.
 \subsubsection{One-disease constraint}
 \label{subsubsec:odc}
 
-To avoid maximising over the $2^N$ configurations of the item nodes, Bauer et al.\
+To avoid maximizing over the $2^N$ configurations of the item nodes, Bauer et al.\
 impose the constraint
 %
 \begin{align}
@@ -363,7 +363,7 @@ in \Section{sec:models}.
 \subsubsection{$k$-least frequency annotations constraint}
 \label{subsubsec:kleast}
 
-To avoid marginalising over the $2^M$ configurations of the hidden nodes,
+To avoid marginalizing over the $2^M$ configurations of the hidden nodes,
 Bauer et al.\ simplify the local probability distribution of each hidden node
 that is given by \Equation{eq:lpdhids}.
 %
@@ -384,7 +384,7 @@ Therefore, to compute the sum over in $\vec{H} \in \{0, 1\}^M$ in
 summands representing configurations in which the likelihood of all hidden nodes
 with deterministic activity, is one, since the remaining terms are zero.
 %
-This makes the marginalisation computationally tractable.
+This makes the marginalization computationally tractable.
 %
 In \Section{sec:models}, we describe models that either adopt or relax this
 constraint.

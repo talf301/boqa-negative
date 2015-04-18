@@ -15,7 +15,7 @@ desired functionality.
 \label{subsec:modnetstruct}
 
 Recall that in the BOQA network, the probability of activity in a hidden node is
-realised as  
+realized as  
 %
 \begin{align}\label{eq:lpdhidden}
     P \left(H_i = 1 \mid I_{\text{ea}(i)}, \bigvee H_{\text{chi}(i)}\right)
@@ -78,13 +78,13 @@ small value, $p$.
 }
 
 However, the result of this modification to the network is that exact inference
-is now intractable, since marginalising over all binary assignments to the
+is now intractable, since marginalizing over all binary assignments to the
 hidden nodes is exponential in the number of phenotypes,
 as noted in \Section{subsubsec:kleast}. 
 %
 Furthermore, we may not apply the $k$-least frequencies restriction 
 described in \Section{subsubsec:kleast}. 
-to simplify the marginalisation, since that would force some hidden nodes to
+to simplify the marginalization, since that would force some hidden nodes to
 deterministically be inactive, conditional on activity in
 some item node, even though the corresponding phenotypes may not be negatively
 annotated to the active disease.
